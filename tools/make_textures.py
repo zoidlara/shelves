@@ -99,3 +99,56 @@ save(np.stack([c, c, c], -1), "cloth.jpg", q=88)
 p = 0.5 + 0.05 * fft_noise(256, 256, beta=1.0, seed=61) + 0.08 * fft_noise(256, 256, beta=2.6, seed=62)
 p = np.clip(p, 0, 1) * 255
 save(np.stack([p, p, p], -1), "grain.jpg", q=86)
+
+# ───────────── theme woods ─────────────
+def knots(h, w, seed, n=3):
+    """Dark knots for pine: soft ellipses with a ring, tileable by wrapping."""
+    r = np.random.default_rng(seed)
+    yy, xx = np.mgrid[0:h, 0:w]
+    k = np.zeros((h, w))
+    for _ in range(n):
+        cy, cx = r.uniform(0, h), r.uniform(0, w)
+        ry, rx = r.uniform(6, 12), r.uniform(10, 22)
+        dy = np.minimum(np.abs(yy - cy), h - np.abs(yy - cy)); dx = np.minimum(np.abs(xx - cx), w - np.abs(xx - cx))
+        d = np.sqrt((dy / ry) ** 2 + (dx / rx) ** 2)
+        k += np.exp(-d ** 2 * 1.6) * 0.9 + np.exp(-((d - 1.4) / 0.35) ** 2) * 0.25
+    return np.clip(k, 0, 1)
+
+def planks(img, plank=128, depth=0.35):
+    n = img.shape[1]; xs = np.arange(n) % plank
+    seam = np.ones(n); seam[xs < 2] = depth; seam[xs == 2] = 0.7; seam[xs == plank - 1] = 0.82
+    tint = 1 + 0.08 * np.sin(np.arange(n) // plank * 2.3)
+    return img * (seam * tint)[None, :, None]
+
+THEME_WOODS = {
+    # forest: weathered olive oak
+    "moss": ([(0, (16, 18, 10)), (0.35, (38, 40, 22)), (0.6, (64, 62, 36)), (0.85, (92, 86, 52)), (1, (120, 112, 72))],
+             [(0, (6, 12, 8)), (0.4, (12, 24, 15)), (0.7, (20, 36, 22)), (1, (30, 50, 32))]),
+    # celestial: navy-painted wood, grain barely showing through
+    "navy": ([(0, (8, 10, 18)), (0.4, (16, 20, 34)), (0.7, (25, 30, 48)), (1, (40, 46, 68))],
+             [(0, (4, 5, 10)), (0.4, (8, 10, 19)), (0.7, (12, 15, 28)), (1, (18, 22, 38))]),
+    # cabin: honey pine
+    "pine": ([(0, (96, 52, 20)), (0.3, (150, 88, 38)), (0.6, (196, 128, 62)), (0.85, (222, 160, 90)), (1, (238, 186, 118))],
+             [(0, (70, 36, 14)), (0.35, (118, 66, 28)), (0.7, (164, 102, 50)), (1, (196, 136, 76))]),
+    # gothic: ebony
+    "ebony": ([(0, (5, 4, 4)), (0.4, (14, 11, 10)), (0.7, (26, 20, 18)), (1, (46, 36, 32))],
+              [(0, (3, 2, 2)), (0.5, (10, 8, 7)), (1, (24, 18, 16))]),
+    # modern: pale oak
+    "oak": ([(0, (150, 112, 74)), (0.35, (184, 146, 104)), (0.6, (206, 172, 130)), (0.85, (224, 196, 158)), (1, (236, 214, 182))],
+            [(0, (150, 112, 74)), (0.5, (196, 160, 118)), (1, (226, 200, 164))]),
+}
+for name, (pal, panel_pal) in THEME_WOODS.items():
+    rings = 11 if name == "oak" else 8
+    h = wood(256, 1024, 101 + len(name), rings=rings, palette=pal)
+    v = np.rot90(wood(256, 1024, 201 + len(name), rings=rings - 1, palette=pal)).copy()
+    if name == "pine":
+        h = h * (1 - 0.55 * knots(256, 1024, 7, 4))[:, :, None]
+        v = v * (1 - 0.55 * np.rot90(knots(256, 1024, 9, 4)))[:, :, None]
+    save(h, f"{name}-h.jpg"); save(v, f"{name}-v.jpg")
+    p = np.rot90(wood(512, 512, 301 + len(name), rings=10, palette=panel_pal)).copy()
+    if name == "pine": p = p * (1 - 0.5 * np.rot90(knots(512, 512, 11, 3)))[:, :, None]
+    save(planks(p, 128, 0.45 if name in ("oak", "pine") else 0.35), f"{name}-panel.jpg")
+
+# modern: soft white plaster wall
+pl = 240 + 2.2 * fft_noise(512, 512, beta=2.4, seed=71) + 1.4 * fft_noise(512, 512, beta=1.0, seed=72)
+save(np.stack([pl, pl - 3, pl - 8], -1), "plaster.jpg", q=86)

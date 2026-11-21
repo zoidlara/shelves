@@ -21,6 +21,8 @@ export function hash(str = "") {
   return h >>> 0;
 }
 export const paletteFor = key => PALETTE[hash(key) % PALETTE.length];
+// The active room (theme) swaps in its own book colours.
+export function setPalette(list) { PALETTE.splice(0, PALETTE.length, ...list); }
 // Books in one series share a binding colour, like a matching set on a real shelf.
 export const seriesOf = item => ((item.extra && item.extra.series) || "").replace(/\s*#?\d+\s*$/, "").trim();
 export const paletteOf = item => paletteFor(seriesOf(item) ? seriesOf(item) + "|" + (item.creator || "") : item.title + item.creator);

@@ -22,3 +22,7 @@ export const STARTER_SHELF_FOR = "mirko";
 
 // What the big shared room is called.
 export const HALL_NAME = "The Lantern Hall";
+
+// The room look friends see first: academia, forest, celestial, cabin, gothic or modern.
+// Everyone can still switch it for themselves with the brush button.
+export const DEFAULT_THEME = "academia";

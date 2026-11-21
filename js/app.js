@@ -1,9 +1,10 @@
 import * as db from "./db.js";
 import * as lookup from "./lookup.js";
 import { SEED_ITEMS } from "./seeds.js";
-import { HALL_NAME, STARTER_SHELF_FOR } from "./config.js";
+import { HALL_NAME, STARTER_SHELF_FOR, DEFAULT_THEME } from "./config.js";
 import { esc, hash, paletteOf, seriesOf, coverHTML, sampleColor, emblemSVG, emblemFor, makeShareCard, hexHue } from "./covers.js";
-import { ICON, FLOURISH, SCONCE, gothicWindowSVG, SHARED_DEFS, fillBay } from "./art.js";
+import { ICON, FLOURISH, SCONCE, windowSVG, vineSVG, SHARED_DEFS, fillBay } from "./art.js";
+import { THEMES, applyTheme, savedTheme, theme, currentThemeId } from "./themes.js";
 
 /* ═══════════════ constants ═══════════════ */
 const KINDS = {
@@ -45,6 +46,7 @@ function colorOf(it) {
 
 /* ═══════════════ boot ═══════════════ */
 async function boot() {
+  applyTheme(savedTheme(DEFAULT_THEME), false);
   document.body.insertAdjacentHTML("afterbegin", SHARED_DEFS);
   $("#brandName").textContent = HALL_NAME;
   document.title = `${HALL_NAME} · Shelves`;
@@ -151,6 +153,7 @@ function renderTop() {
     if (state.route.page !== "shelf") parts.push(`<a class="btn small" href="${shelfHref("me")}">${ICON.book}<span class="lbl">My shelf</span></a>`);
     parts.push(`<button class="btn ghost small icon-btn" data-act="name" title="Your name on the shelf" aria-label="Your name">${ICON.user}</button>`);
   }
+  parts.push(`<button class="btn ghost small icon-btn" data-act="theme" title="Change the room" aria-label="Change the room">${ICON.brush}</button>`);
   el.innerHTML = parts.join("");
 }
 document.addEventListener("click", e => {
@@ -161,6 +164,7 @@ document.addEventListener("click", e => {
   if (act === "signin") openAuth("signin");
   if (act === "account") openAccount();
   if (act === "name") openNameModal();
+  if (act === "theme") openThemes();
 });
 
 /* ═══════════════ HALL ═══════════════ */
@@ -192,13 +196,13 @@ function renderHall() {
 
   view.innerHTML = `<section class="hall">
     <div class="hall-head">
-      <div class="kicker">Societas Lectorum · Est. MMXXVI</div>
+      <div class="kicker">${esc(theme().kicker)}</div>
       <h1 class="hall-title">${esc(HALL_NAME)}</h1>
       ${FLOURISH}
-      <p class="hall-sub">A reading room for those who never quite return their books on time.</p>
+      <p class="hall-sub">${esc(theme().sub)}</p>
     </div>
     <div class="room">
-      <div class="windows">${[0, 1, 2, 3, 4].map(i => gothicWindowSVG(i) + (i < 4 ? SCONCE : "")).join("")}</div>
+      <div class="windows">${[0, 1, 2, 3, 4].map(i => windowSVG(i, currentThemeId()) + (i < 4 && theme().sconces ? SCONCE : "")).join("")}</div>
       <div class="wainscot"></div>
       <div class="runner"></div>
       <div class="alcoves">${ppl.map(p => miniCase(p, p.id === meId)).join("")}${empty}</div>
@@ -297,7 +301,8 @@ function bindingOf(it) {
   if (it.kind !== "book") return "";
   const s = seriesOf(it); const k = hash((s ? s + it.creator : it.title) + "bind");
   if (it.cover && k % 6 !== 0) return "b-jacket";
-  return ["b-leather", "b-cloth", "b-leather", "b-vellum", "b-cloth", "b-leather"][k % 6];
+  const b = theme().bindings;
+  return b[k % b.length];
 }
 
 // Shorter spine text: "Harry Potter and the Chamber of Secrets" → "Chamber of Secrets"
@@ -315,6 +320,7 @@ function spineTitle(it) {
 
 function volHTML(it, i, lean) {
   const { w, h, d } = dims(it); const c = colorOf(it); const bind = bindingOf(it);
+  const pale = hexHue(c.bg)[2] > 0.55 ? "pale" : "";
   const stitle = spineTitle(it);
   const filmTop = it.kind === "film" ? (it.cover ? 84 : 38) : 0;
   const author = (it.creator || "").split(",")[0].split(" ").slice(-1)[0];
@@ -328,7 +334,7 @@ function volHTML(it, i, lean) {
   const strip = it.kind === "film" && it.cover ? `<span class="poster-strip"><img src="${esc(it.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></span>` : "";
   const head = it.kind === "film" ? strip : emblemSVG(emblemFor(it), "em");
   const tail = it.kind === "film" ? emblemSVG("reel", "em") : seasons || (showAuthor ? `<span class="a">${esc(author)}</span>` : `<span class="a-none"></span>`);
-  return `<button class="vol k-${it.kind} ${bind} ${lean ? "lean" : ""}" data-id="${it.id}" style="--w:${w}px;--h:${h}px;--d:${d}px;--c:${c.bg};--ink:${c.ink};--i:${i};--fs:${fs}px;--tmax:${avail}px;--ftop:${filmTop}px" aria-label="${esc(it.title)}${it.creator ? ", " + esc(it.creator) : ""}">
+  return `<button class="vol k-${it.kind} ${bind} ${pale} ${lean ? "lean" : ""}" data-id="${it.id}" style="--w:${w}px;--h:${h}px;--d:${d}px;--c:${c.bg};--ink:${c.ink};--i:${i};--fs:${fs}px;--tmax:${avail}px;--ftop:${filmTop}px" aria-label="${esc(it.title)}${it.creator ? ", " + esc(it.creator) : ""}">
     <span class="body">
       <span class="face spine">${head}<span class="lbl"><span class="t">${esc(stitle)}</span></span>${tail}</span>
       <span class="face cover-face">${coverHTML(it)}</span>
@@ -343,6 +349,12 @@ function volHTML(it, i, lean) {
    Books fill bays left to right; leftover space and empty bays get objects. */
 const BAY_PAD = 12, GAP = 2, STILE = 18;
 const bayCount = w => (w >= 960 ? 3 : w >= 600 ? 2 : 1);
+
+// A few ivy strands hanging from a board, at spots that look random but stay put.
+function vinesFor(seed, max = 2) {
+  const n = 1 + (hash("vn" + seed) % max);
+  return Array.from({ length: n }, (_, k) => `<span class="vine" style="left:${4 + (hash("vx" + seed + k) % 90)}%">${vineSVG(seed + k)}</span>`).join("");
+}
 
 function packBays(list, room) {
   const bays = []; let cur = [], used = 0;
@@ -381,7 +393,8 @@ function renderShelves(animate = false) {
   const decoRun = parts => (parts.length ? `<div class="deco-run">${parts.map(p => p.html).join("")}</div>` : "");
   const rowHTML = (bays, label) => {
     const r = rowNo++;
-    return `<div class="shelf-row">${label || ""}<div class="bays">${bays.join('<div class="stile"></div>')}</div><div class="shelf-board" style="--wx:${-(hash("bx" + r) % 700)}px;--wy:${-((r * 61) % 200)}px"></div></div>`;
+    const vines = theme().vines ? vinesFor("row" + r + owner.id) : "";
+    return `<div class="shelf-row">${label || ""}<div class="bays">${bays.join('<div class="stile"></div>')}</div><div class="shelf-board" style="--wx:${-(hash("bx" + r) % 700)}px;--wy:${-((r * 61) % 200)}px">${vines}</div></div>`;
   };
 
   const section = (status, labelText) => {
@@ -420,7 +433,7 @@ function renderShelves(animate = false) {
     return out;
   };
 
-  caseEl.innerHTML = `<div class="case-crown"><i class="cap"></i><i class="cove"></i><i class="dentils"></i><i class="fascia"></i></div>
+  caseEl.innerHTML = `<div class="case-crown"><i class="cap"></i><i class="cove"></i><i class="dentils"></i><i class="fascia">${theme().vines ? vinesFor("crown" + owner.id, 3) : ""}</i></div>
     <div class="case-body">${section("done", K.done)}${section("want", K.want)}</div>
     <div class="case-plinth"><i class="torus"></i><i class="base"></i></div>`;
 
@@ -913,6 +926,19 @@ function openAccount() {
   });
 }
 
+function openThemes() {
+  const cur = currentThemeId();
+  const w = openModal(`<h2>Change the room</h2><p class="lead">Pick a look for the Hall and every shelf in it. Only this browser changes.</p>
+    <div class="theme-grid">${Object.entries(THEMES).map(([id, t]) => `<button class="theme-card" data-theme-id="${id}" aria-pressed="${id === cur}">
+      <span class="sw">${t.swatch.map(c => `<i style="background:${c}"></i>`).join("")}</span><b>${esc(t.name)}</b><span>${esc(t.blurb)}</span></button>`).join("")}</div>`, { wide: true, wax: ICON.brush });
+  $$(".theme-card", w).forEach(b => b.addEventListener("click", () => {
+    applyTheme(b.dataset.themeId);
+    $$(".theme-card", w).forEach(x => x.setAttribute("aria-pressed", x === b));
+    route(true);
+    toast(`Welcome to the ${THEMES[b.dataset.themeId].name} ✦`);
+  }));
+}
+
 function openNameModal() {
   const me = state.me;
   const w = openModal(`<h2>Who keeps this shelf?</h2><p class="lead">Your name goes on the brass plate of your bookcase.</p>
@@ -927,19 +953,37 @@ function startMotes() {
   const c = $("#motes"); const x = c.getContext("2d"); let W, H, dpr;
   const resize = () => { dpr = Math.min(2, devicePixelRatio || 1); W = c.width = innerWidth * dpr; H = c.height = innerHeight * dpr; };
   resize(); addEventListener("resize", resize);
-  const N = innerWidth < 700 ? 22 : 40;
-  const motes = Array.from({ length: N }, () => ({ x: Math.random(), y: Math.random(), r: Math.random() * 1.6 + .4, vx: (Math.random() - .5) * .00012, vy: -Math.random() * .00018 - .00003, p: Math.random() * 6.28, fire: false }));
+  let kind = null, motes = [], rgb = "255,220,150";
+  const spawn = m => {
+    const k = m.kind;
+    Object.assign(m, { x: Math.random(), y: k === "ember" ? 1 + Math.random() * .2 : Math.random(), r: Math.random() * 1.6 + .4, p: Math.random() * 6.28,
+      vx: (Math.random() - .5) * (k === "firefly" ? .00006 : .00012),
+      vy: k === "twinkle" ? 0 : k === "ember" ? -Math.random() * .00012 - .00006 : k === "firefly" ? (Math.random() - .5) * .00005 : -Math.random() * .00018 - .00003 });
+    return m;
+  };
+  const rebuild = () => {
+    const t = theme().motes; kind = t.kind; rgb = t.rgb;
+    const N = Math.round((innerWidth < 700 ? .55 : 1) * t.n);
+    motes = Array.from({ length: N }, () => spawn({ kind }));
+  };
   let last = performance.now();
   const tick = t => {
+    if (theme().motes.kind !== kind) rebuild();
     const dt = Math.min(50, t - last); last = t;
     x.clearRect(0, 0, W, H);
     for (const m of motes) {
-      m.x += m.vx * dt + Math.sin((t / 3000) + m.p) * .00005 * dt; m.y += m.vy * dt; m.p += .0008 * dt;
-      if (m.y < -.02) { m.y = 1.02; m.x = Math.random(); } if (m.x < -.02) m.x = 1.02; if (m.x > 1.02) m.x = -.02;
-      const a = m.fire ? (.35 + .65 * Math.max(0, Math.sin(m.p * 2))) : .14 + .12 * Math.sin(m.p);
-      const R = (m.fire ? m.r * 2.2 : m.r) * dpr;
+      m.x += m.vx * dt + (kind === "twinkle" ? 0 : Math.sin((t / 3000) + m.p) * .00005 * dt); m.y += m.vy * dt; m.p += (kind === "twinkle" ? .0016 : .0008) * dt;
+      if (m.y < -.02) { if (kind === "ember") spawn(m); else { m.y = 1.02; m.x = Math.random(); } }
+      if (m.y > 1.25) m.y = -.02;
+      if (m.x < -.02) m.x = 1.02; if (m.x > 1.02) m.x = -.02;
+      let a, R = m.r;
+      if (kind === "firefly") { a = .1 + .9 * Math.max(0, Math.sin(m.p * 1.6)) ** 3; R = m.r * 2.2; }
+      else if (kind === "twinkle") { a = .15 + .6 * (0.5 + 0.5 * Math.sin(m.p * 2.2)) ** 4; R = m.r * .8; }
+      else if (kind === "ember") { a = Math.max(0, .25 + .55 * Math.sin(m.p)) * Math.min(1, m.y * 1.4); R = m.r * 1.1; }
+      else a = .14 + .12 * Math.sin(m.p);
+      R *= dpr;
       const g = x.createRadialGradient(m.x * W, m.y * H, 0, m.x * W, m.y * H, R * 4);
-      g.addColorStop(0, m.fire ? `rgba(220,255,150,${a})` : `rgba(255,220,150,${a})`); g.addColorStop(1, "rgba(255,200,120,0)");
+      g.addColorStop(0, `rgba(${rgb},${a})`); g.addColorStop(1, `rgba(${rgb},0)`);
       x.fillStyle = g; x.beginPath(); x.arc(m.x * W, m.y * H, R * 4, 0, 6.283); x.fill();
     }
     if (!document.hidden) requestAnimationFrame(tick); else setTimeout(() => requestAnimationFrame(tick), 500);

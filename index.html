@@ -7,10 +7,12 @@
   <meta name="description" content="A cosy candlelit hall of bookshelves: books read and wished for, films, shows and songs, shared with friends.">
   <meta name="theme-color" content="#0b0907">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <script>try { document.documentElement.dataset.theme = localStorage.getItem("shelves.theme") || ""; } catch (e) {}</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IM+Fell+English:ital@0;1&family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/themes.css">
 </head>
 <body>
   <canvas id="motes" aria-hidden="true"></canvas>
