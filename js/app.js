@@ -2,8 +2,8 @@ import * as db from "./db.js";
 import * as lookup from "./lookup.js";
 import { SEED_ITEMS } from "./seeds.js";
 import { HALL_NAME, STARTER_SHELF_FOR } from "./config.js";
-import { esc, hash, paletteFor, coverHTML, sampleColor, emblemSVG, emblemFor, makeShareCard, hexHue } from "./covers.js";
-import { ICON, FLOURISH, SCONCE, gothicWindowSVG, decoFor, DECO_W } from "./art.js";
+import { esc, hash, paletteOf, seriesOf, coverHTML, sampleColor, emblemSVG, emblemFor, makeShareCard, hexHue } from "./covers.js";
+import { ICON, FLOURISH, SCONCE, gothicWindowSVG, SHARED_DEFS, fillBay } from "./art.js";
 
 /* ═══════════════ constants ═══════════════ */
 const KINDS = {
@@ -40,11 +40,12 @@ const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = se
 function colorOf(it) {
   if (it.extra && it.extra.color) return it.extra.color;
   if (state.colors[it.id]) return state.colors[it.id];
-  return paletteFor(it.title + it.creator);
+  return paletteOf(it);
 }
 
 /* ═══════════════ boot ═══════════════ */
 async function boot() {
+  document.body.insertAdjacentHTML("afterbegin", SHARED_DEFS);
   $("#brandName").textContent = HALL_NAME;
   document.title = `${HALL_NAME} · Shelves`;
   try { await db.init(); } catch (e) { console.error(e); }
@@ -280,18 +281,29 @@ function sortItems(list) {
 
 function dims(it) {
   const h = hash(it.id + it.title);
-  if (it.kind === "film") return { w: 26, h: 186 };
-  if (it.kind === "show") return { w: 40 + (h % 10), h: 180 };
-  if (it.kind === "song") return { w: 18, h: 168 };
+  if (it.kind === "film") return { w: 26, h: 188, d: 132 };
+  if (it.kind === "show") return { w: 40 + (h % 12), h: 184, d: 130 };
+  if (it.kind === "song") return { w: 14 + (h % 6), h: 160, d: 146 };
+  // A series shares one edition height; thickness follows the page count.
+  const s = seriesOf(it);
+  const height = 150 + (hash(s ? s + "|" + it.creator : it.id + it.title) % 56);
   const pages = it.extra && it.extra.pages;
-  const w = pages ? Math.max(24, Math.min(56, Math.round(18 + pages / 22))) : 26 + (h % 16);
-  return { w, h: 156 + (h % 34) };
+  const w = pages ? Math.max(22, Math.min(58, Math.round(16 + pages / 20))) : 24 + (h % 20);
+  return { w, h: height, d: Math.round(height * 0.68) };
+}
+
+// Binding style: modern books with a real cover wear dust jackets; the rest are leather, cloth or vellum.
+function bindingOf(it) {
+  if (it.kind !== "book") return "";
+  const s = seriesOf(it); const k = hash((s ? s + it.creator : it.title) + "bind");
+  if (it.cover && k % 6 !== 0) return "b-jacket";
+  return ["b-leather", "b-cloth", "b-leather", "b-vellum", "b-cloth", "b-leather"][k % 6];
 }
 
 // Shorter spine text: "Harry Potter and the Chamber of Secrets" → "Chamber of Secrets"
 function spineTitle(it) {
   let t = it.title;
-  const series = ((it.extra && it.extra.series) || "").replace(/\s*#?\d+$/, "").trim();
+  const series = seriesOf(it);
   if (series && t.length > 22) {
     const re = new RegExp("^" + series.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*(and the|and|:|-)\\s*", "i");
     const short = t.replace(re, "");
@@ -302,21 +314,23 @@ function spineTitle(it) {
 }
 
 function volHTML(it, i, lean) {
-  const { w, h } = dims(it); const c = colorOf(it);
+  const { w, h, d } = dims(it); const c = colorOf(it); const bind = bindingOf(it);
   const stitle = spineTitle(it);
   const filmTop = it.kind === "film" ? (it.cover ? 84 : 38) : 0;
   const author = (it.creator || "").split(",")[0].split(" ").slice(-1)[0];
   const authorLen = Math.min(46, author.length * 5 + 10);
   const titleNeed = stitle.length * 0.86 * 9 + 16;
-  const showAuthor = w >= 26 && author && it.kind === "book" && h - 60 - authorLen >= titleNeed;
-  const avail = it.kind === "film" ? h - filmTop - 34 : h - 60 - (showAuthor ? authorLen : 0);
+  const showAuthor = w >= 26 && author && it.kind === "book" && h - 64 - authorLen >= titleNeed;
+  const avail = it.kind === "film" ? h - filmTop - 34 : h - 64 - (showAuthor ? authorLen : 0);
   const fs = Math.max(7, Math.min(Math.floor(w * 0.4), 12, Math.floor((avail - 16) / Math.max(4, stitle.length * 0.86))));
   const others = (it.ratings || []).some(r => r.user_id !== it.owner);
   const seasons = it.kind === "show" && it.year ? `<span class="seasons">${esc(it.year)}</span>` : "";
   const strip = it.kind === "film" && it.cover ? `<span class="poster-strip"><img src="${esc(it.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></span>` : "";
-  return `<button class="vol k-${it.kind} ${lean ? "lean" : ""}" data-id="${it.id}" style="--w:${w}px;--h:${h}px;--c:${c.bg};--ink:${c.ink};--i:${i};--fs:${fs}px;--tmax:${avail}px;--ftop:${filmTop}px" aria-label="${esc(it.title)}${it.creator ? ", " + esc(it.creator) : ""}">
+  const head = it.kind === "film" ? strip : emblemSVG(emblemFor(it), "em");
+  const tail = it.kind === "film" ? emblemSVG("reel", "em") : seasons || (showAuthor ? `<span class="a">${esc(author)}</span>` : `<span class="a-none"></span>`);
+  return `<button class="vol k-${it.kind} ${bind} ${lean ? "lean" : ""}" data-id="${it.id}" style="--w:${w}px;--h:${h}px;--d:${d}px;--c:${c.bg};--ink:${c.ink};--i:${i};--fs:${fs}px;--tmax:${avail}px;--ftop:${filmTop}px" aria-label="${esc(it.title)}${it.creator ? ", " + esc(it.creator) : ""}">
     <span class="body">
-      <span class="face spine">${strip}${it.kind !== "film" ? emblemSVG(emblemFor(it), "em") : ""}<span class="t">${esc(stitle)}</span>${it.kind === "film" ? emblemSVG("reel", "em") : seasons || (showAuthor ? `<span class="a">${esc(author)}</span>` : "")}</span>
+      <span class="face spine">${head}<span class="lbl"><span class="t">${esc(stitle)}</span></span>${tail}</span>
       <span class="face cover-face">${coverHTML(it)}</span>
       <span class="face back-face"></span>
       <span class="face top-face"></span>
@@ -325,15 +339,20 @@ function volHTML(it, i, lean) {
   </button>`;
 }
 
-function chunkRows(list, innerW, seedBase) {
-  const rows = []; let row = [], used = DECO_W;
+/* The case is built from bays (the open boxes between upright dividers).
+   Books fill bays left to right; leftover space and empty bays get objects. */
+const BAY_PAD = 12, GAP = 2, STILE = 18;
+const bayCount = w => (w >= 960 ? 3 : w >= 600 ? 2 : 1);
+
+function packBays(list, room) {
+  const bays = []; let cur = [], used = 0;
   for (const it of list) {
-    const w = dims(it).w + 3;
-    if (row.length && used + w > innerW) { rows.push(row); row = []; used = DECO_W; }
-    row.push(it); used += w;
+    const w = dims(it).w + GAP;
+    if (cur.length && used + w > room) { bays.push({ items: cur, used }); cur = []; used = 0; }
+    cur.push(it); used += w;
   }
-  if (row.length || !rows.length) rows.push(row);
-  return rows.map((r, i) => ({ items: r, deco: decoFor(seedBase + i), space: innerW - r.reduce((a, it) => a + dims(it).w + 3, DECO_W) }));
+  if (cur.length) bays.push({ items: cur, used });
+  return bays;
 }
 
 function renderShelves(animate = false) {
@@ -345,29 +364,67 @@ function renderShelves(animate = false) {
   items = sortItems(items);
   const caseEl = $("#bookcase"); if (!caseEl) return;
   caseEl.classList.toggle("calm", !animate);
+  const cs = getComputedStyle(caseEl);
   const caseW = caseEl.clientWidth || Math.min(1240, document.documentElement.clientWidth - 32);
-  const innerW = caseW - 2 * Math.min(26, Math.max(14, caseW * 0.02)) - 40;
+  const innerW = caseW - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0);
+  const n = bayCount(innerW);
+  const bayW = (innerW - (n - 1) * STILE) / n;
+  const room = Math.floor(bayW - 2 * BAY_PAD);
+  let idx = 0, rowNo = 0;
+  const used = new Set();
 
-  const section = (status, label) => {
-    const list = items.filter(i => i.status === status);
-    const rows = chunkRows(list, innerW, hash(owner.id + kind + status) % 97);
-    const emptyMsg = status === "done"
-      ? (mine ? `Your first ${K.one} is waiting to be shelved.<br><button class="btn gold small" data-add="${status}">${ICON.quill} ${K.add}</button>` : `Nothing here yet.`)
-      : (mine ? `Wishes go here: ${K.one}s you’d love to get to.<br><button class="btn small" data-add="${status}">${ICON.plus} Add a wish</button>` : `No wishes yet.`);
-    let idx = 0;
-    const rowsHTML = rows.map((r, ri) => {
-      const atStart = ri % 2 === 1;
-      const vols = r.items.map((it, j) => volHTML(it, idx++, j === r.items.length - 1 && r.space > 40 && r.items.length > 2)).join("");
-      const content = list.length ? (atStart ? r.deco + vols : vols + `<span style="flex:1"></span>` + r.deco) : `<div class="empty-shelf">${emptyMsg}</div>${r.deco}`;
-      return `<div class="shelf-row"><div class="shelf-back">${content}</div><div class="shelf-board"></div></div>`;
-    }).join("");
-    return `<div class="section"><div class="plaque"><span class="line"></span><span class="plate">${label}<em>${list.length}</em></span><span class="line"></span></div>${rowsHTML}</div>`;
+  const bayHTML = (k, inner, extraCls = "") => {
+    const own = bayW / 2, shared = innerW / 2 - k * (bayW + STILE);
+    const ox = Math.round(own + (shared - own) * 0.55);
+    return `<div class="bay ${extraCls}" style="--ox:${ox}px"><div class="box-clip"><div class="box"><i class="b-back"></i><i class="b-floor"></i><i class="b-wl"></i><i class="b-wr"></i></div></div>${inner}</div>`;
+  };
+  const decoRun = parts => (parts.length ? `<div class="deco-run">${parts.map(p => p.html).join("")}</div>` : "");
+  const rowHTML = (bays, label) => {
+    const r = rowNo++;
+    return `<div class="shelf-row">${label || ""}<div class="bays">${bays.join('<div class="stile"></div>')}</div><div class="shelf-board" style="--wx:${-(hash("bx" + r) % 700)}px;--wy:${-((r * 61) % 200)}px"></div></div>`;
   };
 
-  caseEl.innerHTML = `<div class="case-crown"><svg class="gem" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1z"/></svg></div>
-    ${section("done", K.done)}${section("want", K.want)}`;
+  const section = (status, labelText) => {
+    const list = items.filter(i => i.status === status);
+    const seed = hash(owner.id + kind + status) % 997;
+    const label = `<div class="label-holder"><span>${labelText}<em>${list.length}</em></span></div>`;
+    if (!list.length) {
+      const msg = status === "done"
+        ? (mine ? `Your first ${K.one} is waiting to be shelved.<br><button class="btn gold small" data-add="${status}">${ICON.quill} ${K.add}</button>` : `Nothing here yet.`)
+        : (mine ? `Wishes go here: the ${K.one}s you’d love to get&nbsp;to.<br><button class="btn small" data-add="${status}">${ICON.plus} Add a wish</button>` : `No wishes yet.`);
+      const mid = Math.floor(n / 2);
+      const bays = Array.from({ length: n }, (_, k) => k === mid
+        ? bayHTML(k, `<div class="shelf-note">${msg}</div>`, "note-bay")
+        : bayHTML(k, decoRun(fillBay(seed + k * 13, room, true, used)), "decor-bay"));
+      return rowHTML(bays, label);
+    }
+    const packed = packBays(list, room);
+    // A short collection sits in the middle bay, with objects either side.
+    const offset = packed.length < n ? Math.floor((n - packed.length) / 2) : 0;
+    const slots = [...Array(offset).fill(null), ...packed];
+    while (slots.length % n) slots.push(null);
+    let out = "";
+    for (let r = 0; r < slots.length / n; r++) {
+      const bays = [];
+      for (let k = 0; k < n; k++) {
+        const b = slots[r * n + k]; const s = seed + r * 31 + k * 7;
+        if (!b) { bays.push(bayHTML(k, decoRun(fillBay(s, room, true, used)), "decor-bay")); continue; }
+        let left = room - b.used;
+        const lean = left > 46 && b.items.length > 2;
+        if (lean) left -= 20;
+        const vols = b.items.map((it, j) => volHTML(it, idx++, lean && j === b.items.length - 1)).join("");
+        bays.push(bayHTML(k, vols + decoRun(left >= 60 ? fillBay(s, left - 6, false, used) : [])));
+      }
+      out += rowHTML(bays, r === 0 ? label : "");
+    }
+    return out;
+  };
 
-  $$(".vol", caseEl).forEach(b => b.addEventListener("click", () => { const it = state.items.find(i => i.id === b.dataset.id); if (it) openDetail(it); }));
+  caseEl.innerHTML = `<div class="case-crown"><i class="cap"></i><i class="cove"></i><i class="dentils"></i><i class="fascia"></i></div>
+    <div class="case-body">${section("done", K.done)}${section("want", K.want)}</div>
+    <div class="case-plinth"><i class="torus"></i><i class="base"></i></div>`;
+
+  $$("button.vol[data-id]", caseEl).forEach(b => b.addEventListener("click", () => { const it = state.items.find(i => i.id === b.dataset.id); if (it) openDetail(it); }));
   $$("[data-add]", caseEl).forEach(b => b.addEventListener("click", () => openAdd(kind, { status: b.dataset.add })));
   applyThemeSearch();
   paintColors(items);
@@ -438,7 +495,7 @@ export function scoreItems(list, q) {
 function applyThemeSearch() {
   const owner = currentOwner(); const finds = $("#finds"); if (!finds || !owner) return;
   const q = state.filter.q;
-  const vols = $$(".vol");
+  const vols = $$(".vol[data-id]");
   if (!q) { vols.forEach(v => v.classList.remove("pulled", "dim")); finds.innerHTML = ""; return; }
   const all = state.items.filter(i => i.owner === owner.id);
   const hits = scoreItems(all, q);

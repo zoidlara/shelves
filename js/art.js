@@ -63,64 +63,149 @@ export const SCONCE = `<div class="sconce" aria-hidden="true"><svg viewBox="0 0 
   <path d="M10 47 H30 L27 52 H13 Z" fill="#a8844c"/><path d="M20 52 V66 M20 66 H34 V80" stroke="#a8844c" stroke-width="3" fill="none"/>
   <rect x="30" y="76" width="8" height="12" fill="#7d6036"/></svg></div>`;
 
-/* shelf objects (inline SVG, drawn with straight edges) */
-const BRASS = "#b08d57", BRASS_D = "#7d6036";
-const DECOS = {
-  lamp: () => `<div class="deco lamp" style="width:70px"><svg width="70" height="118" viewBox="0 0 70 118">
-      <ellipse class="halo" cx="35" cy="96" rx="40" ry="16" fill="#ffd27a" opacity=".16"/>
-      <path d="M6 40 L64 40 L58 22 L12 22 Z" fill="#1f4a33"/><path d="M12 22 L58 22 L56 18 L14 18 Z" fill="#2c6247"/><path d="M8 40 h54" stroke="${BRASS}" stroke-width="2"/>
-      <path d="M14 41 L56 41 L62 52 L8 52 Z" fill="#ffd98a" opacity=".22"/>
-      <path d="M35 40 V96" stroke="${BRASS}" stroke-width="4"/><path d="M33 54 H37" stroke="${BRASS_D}" stroke-width="6"/>
-      <path d="M48 46 V60" stroke="${BRASS}" stroke-width="1.5"/><rect x="46.5" y="60" width="3" height="5" fill="${BRASS}"/>
-      <rect x="12" y="96" width="46" height="10" fill="${BRASS_D}"/><rect x="8" y="106" width="54" height="6" fill="${BRASS}"/></svg></div>`,
-  bust: () => `<div class="deco bust" style="width:62px"><svg width="62" height="124" viewBox="0 0 62 124">
-      <defs><linearGradient id="mb" x1="0" x2="1"><stop offset="0" stop-color="#8f8a80"/><stop offset=".45" stop-color="#e3ded2"/><stop offset="1" stop-color="#9c968a"/></linearGradient></defs>
-      <path d="M24 10 C 34 4, 46 10, 44 24 C 46 28, 47 31, 44 33 L 44 40 C 42 46, 36 48, 30 47 L 30 54 L 22 54 L 22 44 C 16 40, 15 30, 17 22 C 18 16, 20 12, 24 10 Z" fill="url(#mb)"/>
-      <path d="M22 12 c3-5 10-6 15-4 c4-3 9 0 9 4 c3 2 3 6 1 8" stroke="#bdb7aa" stroke-width="2.4" fill="none"/>
-      <path d="M8 76 C 10 62, 18 56, 22 54 L 30 54 C 38 56, 48 62, 52 76 Z" fill="url(#mb)"/><path d="M20 58 L 32 74" stroke="#a49e92" stroke-width="1.4"/>
-      <rect x="16" y="76" width="28" height="6" fill="#d6d0c3"/><rect x="20" y="82" width="20" height="16" fill="url(#mb)"/>
-      <rect x="10" y="98" width="40" height="8" fill="#cfc9bb"/><rect x="6" y="106" width="48" height="10" fill="#b2ac9f"/>
-      <path d="M14 110 h32" stroke="#8a8579" stroke-width=".8"/></svg></div>`,
-  skull: () => `<div class="deco skull" style="width:66px"><svg width="66" height="78" viewBox="0 0 66 78">
-      <rect x="2" y="56" width="62" height="10" fill="#4a1418"/><rect x="2" y="59" width="62" height="1" fill="${BRASS}"/><rect x="62" y="57" width="2" height="8" fill="#e3d8bd"/>
-      <rect x="6" y="66" width="56" height="10" fill="#1d3226"/><rect x="6" y="69" width="56" height="1" fill="${BRASS}"/>
-      <path d="M33 14 C 18 14, 12 24, 13 34 C 14 40, 17 43, 20 45 L 20 52 L 46 52 L 46 45 C 49 43, 52 40, 53 34 C 54 24, 48 14, 33 14 Z" fill="#e2d8c0"/>
-      <path d="M20 31 L28 29 L29 37 L21 38 Z M37 29 L45 31 L44 38 L36 37 Z" fill="#1a130d"/><path d="M33 39 L30 45 H36 Z" fill="#2a1f15"/>
-      <path d="M24 52 V48 M28 52 V48 M32 52 V48 M36 52 V48 M40 52 V48" stroke="#8d8068" stroke-width="1"/>
-      <path d="M16 26 C 20 18, 28 16, 33 16" stroke="#fff" stroke-width="1.5" opacity=".4" fill="none"/></svg></div>`,
-  globe: () => `<div class="deco globe" style="width:62px"><svg width="62" height="110" viewBox="0 0 62 110">
-      <circle cx="31" cy="44" r="24" fill="#6d5a37"/><path d="M14 36 c6 -4 10 2 14 -2 s8 -8 12 -4 c4 6 -4 10 0 14 s10 0 8 8 c-4 6 -12 4 -16 8 M10 50 c6 0 8 6 12 10" stroke="#3a2e1a" stroke-width="3" fill="none" opacity=".75"/>
-      <circle cx="31" cy="44" r="24" fill="none" stroke="#2a1f15" stroke-width="1"/><path d="M7 44 h48 M31 20 v48" stroke="#2a1f15" stroke-width=".6" opacity=".5"/>
-      <path d="M31 14 A 30 30 0 0 1 31 74" stroke="${BRASS}" stroke-width="3" fill="none"/>
-      <path d="M31 74 V92" stroke="${BRASS}" stroke-width="4"/><path d="M14 92 H48 L44 100 H18 Z" fill="${BRASS_D}"/><rect x="10" y="100" width="42" height="6" fill="${BRASS}"/></svg></div>`,
-  hourglass: () => `<div class="deco hourglass" style="width:44px"><svg width="44" height="96" viewBox="0 0 44 96">
-      <rect x="4" y="6" width="36" height="6" fill="#3a2414"/><rect x="4" y="84" width="36" height="6" fill="#3a2414"/>
-      <path d="M8 12 V84 M36 12 V84" stroke="#5a3a1f" stroke-width="3"/>
-      <path d="M12 12 H32 L23 46 L32 84 H12 L21 46 Z" fill="#cfe0e4" opacity=".22" stroke="#cfe0e4" stroke-opacity=".5"/>
-      <path d="M15 22 H29 L22 44 Z" fill="#c9a66b"/><path d="M13 84 L22 66 L31 84 Z" fill="#c9a66b"/><path d="M22 46 V66" stroke="#c9a66b" stroke-width="1"/></svg></div>`,
-  ink: () => `<div class="deco ink" style="width:58px"><svg width="58" height="104" viewBox="0 0 58 104">
-      <path d="M38 6 C 30 20, 24 40, 24 70 L 27 70 C 28 44, 34 22, 44 10 Z" fill="#e8e0cc"/><path d="M38 6 C 34 18, 30 30, 27 46" stroke="#a49a84" stroke-width=".8" fill="none"/>
-      <path d="M44 10 C 40 22, 33 34, 30 50 L 27 70" stroke="#d2c8b2" stroke-width="1" fill="none"/>
-      <rect x="10" y="74" width="34" height="22" fill="#0d1a24"/><rect x="10" y="74" width="34" height="22" fill="url(#mb)" opacity=".08"/>
-      <rect x="18" y="66" width="18" height="8" fill="${BRASS}"/><rect x="6" y="96" width="42" height="5" fill="#3a2414"/>
-      <path d="M13 78 h4 v14 h-4z" fill="#fff" opacity=".12"/></svg></div>`,
-  candle: () => `<div class="deco candle" style="width:40px"><svg width="40" height="132" viewBox="0 0 40 132">
-      <circle class="halo" cx="20" cy="22" r="26" fill="#ffcf6e" opacity=".18"/>
-      <path class="flame" d="M20 6 C 15 14, 16 21, 20 23 C 24 21, 25 14, 20 6 Z" fill="#ffcf6e"/><path class="flame" d="M20 13 C 18 17, 18 20, 20 21 C 22 20, 22 17, 20 13 Z" fill="#fff6d6"/>
-      <rect x="19.3" y="22" width="1.4" height="4" fill="#1a130d"/>
-      <rect x="15" y="26" width="10" height="50" fill="#e8dfc6"/><rect x="15" y="26" width="3" height="50" fill="#fff" opacity=".3"/><path d="M22 26 v12 h3 v-12z" fill="#f6efdc"/>
-      <rect x="12" y="76" width="16" height="5" fill="${BRASS}"/><path d="M17 81 h6 l2 30 h-10z" fill="${BRASS_D}"/><rect x="14" y="94" width="12" height="3" fill="${BRASS}"/>
-      <path d="M6 111 h28 l-4 9 h-20z" fill="${BRASS}"/><rect x="4" y="120" width="32" height="5" fill="${BRASS_D}"/></svg></div>`,
-  stack: seed => {
-    const cols = ["#4a1418", "#1d3226", "#6b4a2a", "#1a2233", "#16130f", "#5e1f26"];
-    const books = [0, 1, 2, 3].map(i => {
-      const c = cols[(hash("st" + seed + i)) % cols.length]; const w = 72 - i * 6 + (hash("w" + seed + i) % 8); const x = (80 - w) / 2 + ((hash("x" + seed + i) % 6) - 3);
-      const y = 64 - (i + 1) * 15;
-      return `<rect x="${x}" y="${y}" width="${w}" height="14" fill="${c}"/><rect x="${x}" y="${y + 2}" width="${w}" height="1" fill="${BRASS}" opacity=".8"/><rect x="${x}" y="${y + 11}" width="${w}" height="1" fill="${BRASS}" opacity=".8"/><rect x="${x + w - 3}" y="${y + 1}" width="3" height="12" fill="#e3d8bd"/>`;
-    }).join("");
-    return `<div class="deco stack" style="width:80px"><svg width="80" height="64" viewBox="0 0 80 64">${books}</svg></div>`;
-  },
+/* ═══════════ shelf objects ═══════════
+   Shared gradients live once in the page (SHARED_DEFS); objects reference them,
+   so brass, glass, marble and bone are all lit from the upper left. */
+export const SHARED_DEFS = `<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <linearGradient id="g-brass" x1="0" x2="1"><stop offset="0" stop-color="#5e4422"/><stop offset=".22" stop-color="#e9cf93"/><stop offset=".38" stop-color="#b8924f"/><stop offset=".7" stop-color="#7a5a2c"/><stop offset="1" stop-color="#3d2b14"/></linearGradient>
+  <linearGradient id="g-brass-v" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9cf93"/><stop offset=".45" stop-color="#a8823f"/><stop offset="1" stop-color="#4a3418"/></linearGradient>
+  <radialGradient id="g-sphere" cx=".36" cy=".32" r=".75"><stop offset="0" stop-color="#cdb98a"/><stop offset=".35" stop-color="#9c8150"/><stop offset=".75" stop-color="#5a4424"/><stop offset="1" stop-color="#22180c"/></radialGradient>
+  <radialGradient id="g-marble" cx=".38" cy=".3" r=".8"><stop offset="0" stop-color="#f4f0e6"/><stop offset=".5" stop-color="#cfc8b9"/><stop offset="1" stop-color="#6e685c"/></radialGradient>
+  <linearGradient id="g-marble-h" x1="0" x2="1"><stop offset="0" stop-color="#e9e4d8"/><stop offset=".55" stop-color="#bdb6a6"/><stop offset="1" stop-color="#5f594e"/></linearGradient>
+  <radialGradient id="g-bone" cx=".38" cy=".32" r=".8"><stop offset="0" stop-color="#f1e7cf"/><stop offset=".55" stop-color="#cbbb98"/><stop offset="1" stop-color="#6b5c42"/></radialGradient>
+  <linearGradient id="g-wax" x1="0" x2="1"><stop offset="0" stop-color="#fbf4e2"/><stop offset=".45" stop-color="#eadfc4"/><stop offset="1" stop-color="#9c8d6c"/></linearGradient>
+  <radialGradient id="g-flame" cx=".5" cy=".75" r=".6"><stop offset="0" stop-color="#fffbe8"/><stop offset=".35" stop-color="#ffd77a"/><stop offset=".8" stop-color="#f08a2a"/><stop offset="1" stop-color="#f08a2a" stop-opacity="0"/></radialGradient>
+  <radialGradient id="g-glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffcf7a" stop-opacity=".55"/><stop offset=".4" stop-color="#ffb860" stop-opacity=".18"/><stop offset="1" stop-color="#ffb860" stop-opacity="0"/></radialGradient>
+  <linearGradient id="g-green-glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5fa47e"/><stop offset=".35" stop-color="#1f5a3c"/><stop offset="1" stop-color="#0b2618"/></linearGradient>
+  <linearGradient id="g-glass" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".05"/><stop offset=".25" stop-color="#fff" stop-opacity=".35"/><stop offset=".35" stop-color="#fff" stop-opacity=".06"/><stop offset="1" stop-color="#fff" stop-opacity=".12"/></linearGradient>
+  <linearGradient id="g-ink" x1="0" x2="1"><stop offset="0" stop-color="#1c2a36"/><stop offset=".3" stop-color="#3b5266"/><stop offset=".45" stop-color="#101820"/><stop offset="1" stop-color="#05080b"/></linearGradient>
+  <linearGradient id="g-wood" x1="0" x2="1"><stop offset="0" stop-color="#2a170c"/><stop offset=".3" stop-color="#6e4224"/><stop offset="1" stop-color="#1e1008"/></linearGradient>
+  <linearGradient id="g-sand" x1="0" x2="1"><stop offset="0" stop-color="#e3c48a"/><stop offset="1" stop-color="#9b7a44"/></linearGradient>
+  <linearGradient id="g-quill" x1="0" x2="1"><stop offset="0" stop-color="#f4eee0"/><stop offset="1" stop-color="#a99f8a"/></linearGradient>
+</defs></svg>`;
+
+const svgObj = (cls, w, h, body) => ({ w: w + 14, html: `<div class="deco obj ${cls}" style="width:${w}px"><svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${body}</svg></div>` });
+
+const OBJECTS = {
+  candle: () => svgObj("candle", 44, 150, `
+    <circle class="halo" cx="22" cy="30" r="40" fill="url(#g-glow)"/>
+    <path class="flame" d="M22 8 C 16 18, 17 27, 22 30 C 27 27, 28 18, 22 8 Z" fill="url(#g-flame)"/>
+    <rect x="21.3" y="29" width="1.4" height="5" fill="#1a130d"/>
+    <path d="M16 34 H28 V96 H16 Z" fill="url(#g-wax)"/>
+    <path d="M16 34 H28 C 28 40 26 39 25.5 46 C 25 41 23 40 22.5 44 C 22 39 19 41 18.5 50 C 18 44 16 41 16 38 Z" fill="#fffaf0" opacity=".85"/>
+    <path d="M10 96 H34 L32 102 H12 Z" fill="url(#g-brass)"/><rect x="18" y="102" width="8" height="10" fill="url(#g-brass)"/>
+    <ellipse cx="22" cy="114" rx="7" ry="3" fill="url(#g-brass)"/><path d="M19 116 h6 l3 18 h-12 z" fill="url(#g-brass)"/>
+    <path d="M6 134 H38 L42 142 H2 Z" fill="url(#g-brass)"/><rect x="1" y="142" width="42" height="5" fill="#4a3418"/>`),
+  lamp: () => svgObj("lamp", 86, 132, `
+    <ellipse class="halo" cx="43" cy="104" rx="60" ry="26" fill="url(#g-glow)"/>
+    <path d="M14 44 L72 44 L66 28 C 60 22, 26 22, 20 28 Z" fill="url(#g-green-glass)"/>
+    <path d="M20 28 C 26 22, 60 22, 66 28" stroke="#9fd0b2" stroke-width="1" fill="none" opacity=".6"/>
+    <path d="M22 30 C 30 26, 40 25, 46 26" stroke="#fff" stroke-width="2" opacity=".35" fill="none"/>
+    <rect x="12" y="43" width="62" height="3" fill="url(#g-brass)"/>
+    <path d="M16 46 L70 46 L78 60 L8 60 Z" fill="#ffdc96" opacity=".18"/>
+    <rect x="40.5" y="46" width="5" height="62" fill="url(#g-brass)"/><rect x="38" y="62" width="10" height="5" fill="url(#g-brass)"/>
+    <path d="M56 48 V68" stroke="url(#g-brass)" stroke-width="1.6"/><circle cx="56" cy="70" r="2.4" fill="url(#g-brass)"/>
+    <path d="M18 108 H68 L72 118 H14 Z" fill="url(#g-brass)"/><rect x="10" y="118" width="66" height="8" fill="url(#g-brass-v)"/>`),
+  globe: () => svgObj("globe", 74, 132, `
+    <circle cx="37" cy="52" r="29" fill="url(#g-sphere)"/>
+    <path d="M18 40 c7 -5 12 2 16 -2 s9 -9 14 -4 c5 7 -5 12 0 16 s12 0 9 9 c-5 7 -14 5 -18 9 M13 58 c7 0 9 7 14 11" stroke="#3a2a14" stroke-width="3.2" fill="none" opacity=".55"/>
+    <ellipse cx="37" cy="52" rx="29" ry="10" fill="none" stroke="#2a1d0e" stroke-width=".6" opacity=".5"/><path d="M37 23 v58" stroke="#2a1d0e" stroke-width=".6" opacity=".5"/>
+    <ellipse cx="28" cy="40" rx="9" ry="6" fill="#fff" opacity=".14"/>
+    <path d="M37 17 A 35 35 0 0 1 37 87" stroke="url(#g-brass)" stroke-width="3.4" fill="none"/>
+    <path d="M37 87 V108" stroke="url(#g-brass)" stroke-width="5"/><path d="M18 108 H56 L51 118 H23 Z" fill="url(#g-wood)"/><rect x="13" y="118" width="48" height="8" fill="url(#g-wood)"/>`),
+  skull: () => svgObj("skull", 76, 104, `
+    <rect x="2" y="70" width="72" height="14" fill="#4a1418"/><rect x="2" y="70" width="72" height="14" fill="url(#g-glass)" opacity=".35"/><rect x="2" y="73" width="72" height="1.2" fill="url(#g-brass)"/><rect x="2" y="80" width="72" height="1.2" fill="url(#g-brass)"/><rect x="70" y="71" width="3" height="12" fill="#e3d8bd"/>
+    <rect x="6" y="84" width="66" height="14" fill="#1d3226"/><rect x="6" y="84" width="66" height="14" fill="url(#g-glass)" opacity=".3"/><rect x="6" y="87" width="66" height="1.2" fill="url(#g-brass)"/><rect x="6" y="94" width="66" height="1.2" fill="url(#g-brass)"/>
+    <path d="M38 14 C 21 14, 14 26, 15 38 C 16 45, 19 49, 23 51 L 23 60 C 26 66, 50 66, 53 60 L 53 51 C 57 49, 60 45, 61 38 C 62 26, 55 14, 38 14 Z" fill="url(#g-bone)"/>
+    <path d="M22 35 C 24 31, 31 31, 33 36 C 33 42, 24 44, 22 39 Z M43 36 C 45 31, 52 31, 54 35 C 54 40, 45 42, 43 36 Z" fill="#1a120a"/>
+    <path d="M38 41 L34 50 H42 Z" fill="#2a1d12"/>
+    <path d="M27 58 V63 M31 59 V64 M35 59 V65 M39 59 V65 M43 59 V64 M47 58 V63" stroke="#7d6e52" stroke-width="1"/>
+    <path d="M19 28 C 23 20, 31 17, 37 17" stroke="#fff" stroke-width="2" opacity=".35" fill="none"/>`),
+  hourglass: () => svgObj("hourglass", 50, 110, `
+    <rect x="3" y="4" width="44" height="8" fill="url(#g-wood)"/><rect x="3" y="98" width="44" height="8" fill="url(#g-wood)"/>
+    <rect x="6" y="12" width="4" height="86" fill="url(#g-wood)"/><rect x="40" y="12" width="4" height="86" fill="url(#g-wood)"/>
+    <path d="M13 12 H37 C 37 34 27 46 26 55 C 27 64 37 76 37 98 H13 C 13 76 23 64 24 55 C 23 46 13 34 13 12 Z" fill="#d9e4e6" opacity=".14" stroke="#e8f0f0" stroke-opacity=".4"/>
+    <path d="M16 26 H34 C 32 38 27 45 25 52 C 23 45 18 38 16 26 Z" fill="url(#g-sand)"/>
+    <path d="M14 98 C 16 84 22 78 25 74 C 28 78 34 84 36 98 Z" fill="url(#g-sand)"/><path d="M25 55 V74" stroke="#d9b779" stroke-width="1"/>
+    <path d="M16 16 C 16 30 20 40 22 48" stroke="#fff" stroke-width="1.6" opacity=".4" fill="none"/>`),
+  bust: () => svgObj("bust", 66, 138, `
+    <path d="M26 10 C 37 3, 50 10, 48 25 C 50 29, 51 33, 48 35 L 48 43 C 46 49, 39 51, 33 50 L 33 58 L 24 58 L 24 47 C 17 43, 16 32, 18 24 C 19 17, 22 13, 26 10 Z" fill="url(#g-marble)"/>
+    <path d="M23 13 c4-6 11-7 16-4 c5-3 10 0 10 5 c3 2 3 7 1 9 M21 20 c2-2 5-2 7 0" stroke="#a9a395" stroke-width="2.2" fill="none"/>
+    <path d="M46 28 l3 4 -3 1" stroke="#8a8478" stroke-width="1" fill="none"/>
+    <path d="M8 82 C 10 66, 19 60, 24 58 L 33 58 C 42 60, 53 66, 57 82 Z" fill="url(#g-marble)"/><path d="M22 62 L 35 80" stroke="#9c968a" stroke-width="1.3"/>
+    <rect x="16" y="82" width="34" height="6" fill="url(#g-marble-h)"/><rect x="21" y="88" width="24" height="18" fill="url(#g-marble-h)"/>
+    <rect x="11" y="106" width="44" height="9" fill="url(#g-marble-h)"/><rect x="6" y="115" width="54" height="12" fill="url(#g-marble-h)"/><path d="M6 120 h54" stroke="#8a8579" stroke-width=".7"/>`),
+  ink: () => svgObj("ink", 62, 118, `
+    <path d="M42 4 C 33 22, 27 46, 27 80 L 30 80 C 31 50, 38 26, 49 9 Z" fill="url(#g-quill)"/><path d="M42 4 C 37 20, 32 36, 29 56" stroke="#8d8370" stroke-width=".8" fill="none"/>
+    <rect x="11" y="84" width="38" height="26" fill="url(#g-ink)"/><rect x="11" y="84" width="38" height="26" fill="url(#g-glass)"/>
+    <rect x="19" y="76" width="22" height="9" fill="url(#g-brass)"/><rect x="7" y="110" width="46" height="5" fill="url(#g-wood)"/>`),
 };
-const ORDER = ["lamp", "bust", "stack", "skull", "candle", "globe", "hourglass", "ink", "stack", "candle", "lamp", "bust"];
-export function decoFor(seed) { const k = ORDER[hash("d" + seed) % ORDER.length]; return DECOS[k](seed); }
-export const DECO_W = 80;
+
+/* decorative (untitled) old books, built like the real ones so they share the textures */
+const OLD_COLS = ["#3d1013", "#162a1f", "#5a3a20", "#141b29", "#120f0c", "#4e1a20", "#2b2a18", "#6a5a3c"];
+function hstack(seed, top, used = new Set()) {
+  const n = 3 + (hash("hn" + seed) % 3);
+  let books = "", maxW = 0;
+  for (let i = 0; i < n; i++) {
+    const w = 96 - i * 7 + (hash("hw" + seed + i) % 12), h = 13 + (hash("hh" + seed + i) % 9);
+    const x = (hash("hx" + seed + i) % 9) - 4; maxW = Math.max(maxW, w + Math.abs(x));
+    const style = ["b-leather", "b-cloth", "b-leather", "b-vellum"][hash("hs" + seed + i) % 4];
+    books = `<span class="hbook ${style}" style="--c:${OLD_COLS[hash("hc" + seed + i) % OLD_COLS.length]};width:${w}px;height:${h}px;margin-left:${x + 6}px"></span>` + books;
+  }
+  let topObj = "";
+  if (top) {
+    const opts = ["skull", "hourglass", "candle"], st = hash("ht" + seed) % 3;
+    let k = opts[st];
+    for (let j = 0; j < 3; j++) if (!used.has(opts[(st + j) % 3])) { k = opts[(st + j) % 3]; break; }
+    used.add(k);
+    const o = OBJECTS[k]();
+    topObj = o.html.replace('class="deco obj', 'class="deco obj on-stack');
+  }
+  return { w: maxW + 22, html: `<div class="deco hstack">${topObj}${books}</div>` };
+}
+function upright(seed, room) {
+  const n = Math.max(2, Math.min(6, Math.floor((room - 30) / 28)));
+  let out = "", w = 0;
+  for (let i = 0; i < n; i++) {
+    const bw = 20 + (hash("uw" + seed + i) % 16), bh = 150 + (hash("uh" + seed + i) % 46);
+    const style = ["b-leather", "b-leather", "b-cloth", "b-vellum"][hash("us" + seed + i) % 4];
+    out += `<span class="vol decor ${style}" aria-hidden="true" style="--w:${bw}px;--h:${bh}px;--c:${OLD_COLS[hash("uc" + seed + i) % OLD_COLS.length]};--ink:#c9a35c"><span class="body"><span class="face spine"><span class="orn"></span></span><span class="face cover-face"></span><span class="face back-face"></span><span class="face top-face"></span></span></span>`;
+    w += bw + 2;
+  }
+  out += `<div class="deco bookend"><svg width="22" height="96" viewBox="0 0 22 96"><path d="M2 94 V20 C 2 8 10 2 20 2 V94 Z" fill="url(#g-brass)"/><path d="M2 94 H22" stroke="#3d2b14" stroke-width="3"/></svg></div>`;
+  return { w: w + 30, html: `<div class="deco upright">${out}</div>` };
+}
+
+const OBJ_ORDER = ["lamp", "globe", "candle", "bust", "hourglass", "ink", "skull"];
+// Pick an object that fits, preferring ones not already on this bookcase.
+function pickObject(seed, room, used = new Set()) {
+  const start = hash("o" + seed) % OBJ_ORDER.length;
+  for (const fresh of [true, false]) {
+    for (let k = 0; k < OBJ_ORDER.length; k++) {
+      const name = OBJ_ORDER[(start + k) % OBJ_ORDER.length];
+      if (fresh && used.has(name)) continue;
+      const o = OBJECTS[name]();
+      if (o.w <= room) { used.add(name); return o; }
+    }
+  }
+  return null;
+}
+
+// Fill `room` pixels of a bay with a believable arrangement. `empty` = no real books in this bay.
+// `used` is shared across one bookcase so the same object doesn't repeat everywhere.
+export function fillBay(seed, room, empty, used = new Set()) {
+  const parts = [];
+  const add = p => { if (p && p.w <= room) { parts.push(p); room -= p.w; return true; } return false; };
+  if (empty) {
+    // Mostly old books, one object per bay at most, like a real lived-in shelf.
+    const plan = hash("plan" + seed) % 3;
+    if (plan === 0) { add(upright(seed, Math.min(room * 0.55, 200))); add(pickObject(seed + 1, room, used)); if (room > 110) add(hstack(seed + 2, false, used)); }
+    else if (plan === 1) { add(hstack(seed, true, used)); add(upright(seed + 3, Math.min(room, 220))); }
+    else { add(pickObject(seed, Math.min(room, 140), used)); add(upright(seed + 4, Math.min(room - 110, 200))); if (room > 110) add(hstack(seed + 6, false, used)); }
+  } else {
+    if (room >= 230) { add(hstack(seed, hash("t" + seed) % 2 === 0, used)); add(pickObject(seed + 1, room, used)); }
+    else if (room >= 120) { (hash("c" + seed) % 2 ? add(hstack(seed, false, used)) : add(pickObject(seed, room, used))); }
+    else if (room >= 60) add(pickObject(seed, room, used));
+  }
+  return parts;
+}

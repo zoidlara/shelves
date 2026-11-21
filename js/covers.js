@@ -21,6 +21,9 @@ export function hash(str = "") {
   return h >>> 0;
 }
 export const paletteFor = key => PALETTE[hash(key) % PALETTE.length];
+// Books in one series share a binding colour, like a matching set on a real shelf.
+export const seriesOf = item => ((item.extra && item.extra.series) || "").replace(/\s*#?\d+\s*$/, "").trim();
+export const paletteOf = item => paletteFor(seriesOf(item) ? seriesOf(item) + "|" + (item.creator || "") : item.title + item.creator);
 
 export const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -66,7 +69,7 @@ const SOURCE_RIBBON = { ao3: ["AO3", "#990000"], wattpad: ["Wattpad", "#ff6122"]
 
 // A complete handmade cover (HTML). Used whenever a real cover is missing.
 export function handmadeCover(item) {
-  const p = paletteFor(item.title + item.creator);
+  const p = paletteOf(item);
   const em = emblemFor(item);
   const rib = SOURCE_RIBBON[item.source];
   const kindLabel = { film: "a motion picture", show: "a television tale", song: "a song", book: "" }[item.kind] || "";
@@ -162,7 +165,7 @@ function wrap(ctx, text, maxW) {
   if (line) lines.push(line); return lines;
 }
 function drawHandmade(ctx, item, x, y, w, h) {
-  const p = paletteFor(item.title + item.creator);
+  const p = paletteOf(item);
   ctx.fillStyle = p.bg; ctx.fillRect(x, y, w, h);
   const g = ctx.createLinearGradient(x, 0, x + w, 0); g.addColorStop(0, "rgba(0,0,0,.35)"); g.addColorStop(.08, "rgba(255,255,255,.08)"); g.addColorStop(.12, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,.25)");
   ctx.fillStyle = g; ctx.fillRect(x, y, w, h);

@@ -2,24 +2,24 @@
 // Covers and genres are looked up online the first time the shelf loads.
 
 const hp = [
-  ["Harry Potter and the Philosopher's Stone", 1997, "An orphaned boy living in a cupboard under the stairs learns on his eleventh birthday that he is a wizard, and is whisked away to Hogwarts School of Witchcraft and Wizardry, where friendship, mystery and a hidden stone await."],
-  ["Harry Potter and the Chamber of Secrets", 1998, "Harry's second year at Hogwarts brings whispering walls, petrified students and an ancient legend about a hidden chamber that only the heir of Slytherin can open."],
-  ["Harry Potter and the Prisoner of Azkaban", 1999, "A dangerous prisoner has escaped Azkaban and seems to be hunting Harry, while dementors guard the school and old secrets about his parents come to light."],
-  ["Harry Potter and the Goblet of Fire", 2000, "Harry is mysteriously entered into the perilous Triwizard Tournament, a contest of dragons, lakes and labyrinths that ends with the return of an old darkness."],
-  ["Harry Potter and the Order of the Phoenix", 2003, "With the Ministry refusing to believe Voldemort has returned, Harry and his friends form a secret band to learn defence while a toad-like professor tightens her grip on Hogwarts."],
-  ["Harry Potter and the Half-Blood Prince", 2005, "Dumbledore shares memories of the young Tom Riddle with Harry, while a mysterious old potions book marked 'property of the Half-Blood Prince' changes everything."],
-  ["Harry Potter and the Deathly Hallows", 2007, "Harry, Ron and Hermione leave Hogwarts behind to hunt the Horcruxes that keep Voldemort alive, uncovering the legend of three powerful Hallows along the way."],
+  ["Harry Potter and the Philosopher's Stone", 1997, "An orphaned boy living in a cupboard under the stairs learns on his eleventh birthday that he is a wizard, and is whisked away to Hogwarts School of Witchcraft and Wizardry, where friendship, mystery and a hidden stone await.", 223],
+  ["Harry Potter and the Chamber of Secrets", 1998, "Harry's second year at Hogwarts brings whispering walls, petrified students and an ancient legend about a hidden chamber that only the heir of Slytherin can open.", 251],
+  ["Harry Potter and the Prisoner of Azkaban", 1999, "A dangerous prisoner has escaped Azkaban and seems to be hunting Harry, while dementors guard the school and old secrets about his parents come to light.", 317],
+  ["Harry Potter and the Goblet of Fire", 2000, "Harry is mysteriously entered into the perilous Triwizard Tournament, a contest of dragons, lakes and labyrinths that ends with the return of an old darkness.", 636],
+  ["Harry Potter and the Order of the Phoenix", 2003, "With the Ministry refusing to believe Voldemort has returned, Harry and his friends form a secret band to learn defence while a toad-like professor tightens her grip on Hogwarts.", 766],
+  ["Harry Potter and the Half-Blood Prince", 2005, "Dumbledore shares memories of the young Tom Riddle with Harry, while a mysterious old potions book marked 'property of the Half-Blood Prince' changes everything.", 607],
+  ["Harry Potter and the Deathly Hallows", 2007, "Harry, Ron and Hermione leave Hogwarts behind to hunt the Horcruxes that keep Voldemort alive, uncovering the legend of three powerful Hallows along the way.", 607],
 ];
 
 export const SEED_ITEMS = [
   {
     kind: "book", status: "done", title: "Fourth Wing", creator: "Rebecca Yarros", year: "2023",
     description: "Twenty-year-old Violet Sorrengail was meant to live a quiet life among books, but her mother orders her into Basgiath War College to train as a dragon rider, where dragons bond with only the strong and everyone around her wants her dead.",
-    genres: ["Romantasy", "Dragons", "Fantasy"], extra: { series: "The Empyrean #1" },
+    genres: ["Romantasy", "Dragons", "Fantasy"], extra: { series: "The Empyrean #1", pages: 498 },
   },
-  ...hp.map(([title, year, description], i) => ({
+  ...hp.map(([title, year, description, pages], i) => ({
     kind: "book", status: "done", title, creator: "J.K. Rowling", year: String(year), description,
-    genres: ["Fantasy", "Magic", "School"], extra: { series: `Harry Potter #${i + 1}` },
+    genres: ["Fantasy", "Magic", "School"], extra: { series: `Harry Potter #${i + 1}`, pages },
   })),
 
   { kind: "film", status: "done", title: "Shrek", creator: "Andrew Adamson, Vicky Jenson", year: "2001",
