@@ -3,7 +3,7 @@ import * as lookup from "./lookup.js";
 import { SEED_ITEMS } from "./seeds.js";
 import { HALL_NAME, STARTER_SHELF_FOR } from "./config.js";
 import { esc, hash, paletteFor, coverHTML, sampleColor, emblemSVG, emblemFor, makeShareCard, hexHue } from "./covers.js";
-import { ICON, FLOURISH, ivySVG, fairyLightsSVG, decoFor, DECO_W } from "./art.js";
+import { ICON, FLOURISH, SCONCE, gothicWindowSVG, decoFor, DECO_W } from "./art.js";
 
 /* ═══════════════ constants ═══════════════ */
 const KINDS = {
@@ -184,7 +184,6 @@ function miniCase(p, isMe) {
 function renderHall() {
   const meId = state.me && state.me.id;
   const ppl = [...state.profiles].sort((a, b) => (a.id === meId ? -1 : b.id === meId ? 1 : 0));
-  const candles = Array.from({ length: 12 }, (_, i) => `<span class="fcandle" style="left:${5 + i * 8 + (hash("c" + i) % 5)}%;top:${10 + (hash("t" + i) % 45)}%;animation-delay:${-(hash("a" + i) % 6000) / 1000}s;transform:scale(${0.7 + (hash("s" + i) % 40) / 100})"></span>`).join("");
   let empty = "";
   if (db.mode === "cloud" && state.me) empty = `<div class="alcove-empty"><strong>An empty alcove</strong>Send your link to a friend and their bookcase will appear right here.<button class="btn moss small" data-act="invite">${ICON.link} Invite a friend</button></div>`;
   else if (db.mode === "cloud") empty = `<div class="alcove-empty"><strong>This alcove is free</strong>Claim it and fill a bookcase with your own stories.<button class="btn gold small" data-act="join">${ICON.plus} Make my bookcase</button></div>`;
@@ -192,14 +191,15 @@ function renderHall() {
 
   view.innerHTML = `<section class="hall">
     <div class="hall-head">
+      <div class="kicker">Societas Lectorum · Est. MMXXVI</div>
       <h1 class="hall-title">${esc(HALL_NAME)}</h1>
-      <p class="hall-sub">A hall of candlelit shelves, one for every reader who wanders in.</p>
       ${FLOURISH}
+      <p class="hall-sub">A reading room for those who never quite return their books on time.</p>
     </div>
     <div class="room">
-      <div class="windows">${"<div class='window'></div>".repeat(5)}</div>
-      <div class="floating-candles">${candles}</div>
-      <div class="rug"></div>
+      <div class="windows">${[0, 1, 2, 3, 4].map(i => gothicWindowSVG(i) + (i < 4 ? SCONCE : "")).join("")}</div>
+      <div class="wainscot"></div>
+      <div class="runner"></div>
       <div class="alcoves">${ppl.map(p => miniCase(p, p.id === meId)).join("")}${empty}</div>
     </div>
     ${db.mode === "local" ? `<p class="banner-note">Your shelf is saved in this browser for now. To share it and give friends their own bookcases in this Hall, follow the short steps in the README.</p>` : ""}
@@ -217,7 +217,7 @@ const isMine = owner => !!(state.me && owner && state.me.id === owner.id);
 function renderLibrary() {
   const owner = currentOwner();
   if (!owner) {
-    view.innerHTML = `<section class="library"><div class="lib-sign"><div class="sign-board"><h1 class="sign-title">Nobody here yet</h1><div class="sign-sub">This bookcase hasn’t been built.</div></div></div><p style="text-align:center"><a class="btn" href="#/">${ICON.door} Back to the Hall</a></p></section>`;
+    view.innerHTML = `<section class="library"><div class="lib-sign"><div class="sign-board"><div class="sign-kicker">Vacant</div><h1 class="sign-title">Nobody here yet</h1><div class="sign-sub">This bookcase hasn’t been built.</div></div></div><p style="text-align:center"><a class="btn" href="#/">${ICON.door} Back to the Hall</a></p></section>`;
     return;
   }
   const kind = state.route.kind; const K = KINDS[kind]; const mine = isMine(owner);
@@ -229,11 +229,13 @@ function renderLibrary() {
   const name = nameOf(owner);
   view.innerHTML = `<section class="library">
     <div class="lib-sign">
-      ${ivySVG("left", hash(owner.id) % 7)}${ivySVG("right", hash(owner.id) % 5 + 3)}
-      <div class="sign-board"><h1 class="sign-title">${esc(possessive(name))} ${kind === "book" ? "Library" : kind === "song" ? "Music Box" : "Cinema"}</h1>
-      <div class="sign-sub">${mine ? "Every story you finish earns its place here." : `You’re visiting. Leave a rating on anything you’ve read or watched too.`}</div></div>
+      <div class="sign-board">
+        <div class="sign-kicker">${{ book: "Ex Libris", film: "The Picture House of", show: "The Serial Room of", song: "The Music Room of" }[kind]}</div>
+        <h1 class="sign-title">${esc(name || "Your Shelf")}</h1>
+        ${FLOURISH}
+        <div class="sign-sub">${mine ? "Every story you finish earns its place here." : "You are visiting. Leave a rating on anything you have read or watched too."}</div>
+      </div>
     </div>
-    ${fairyLightsSVG()}
     <nav class="tabs" aria-label="Shelves">${tabs}</nav>
     <div class="toolbar">
       <label class="search-wrap">${ICON.search}<span class="sr-only">Find on this shelf</span>
@@ -304,9 +306,11 @@ function volHTML(it, i, lean) {
   const stitle = spineTitle(it);
   const filmTop = it.kind === "film" ? (it.cover ? 84 : 38) : 0;
   const author = (it.creator || "").split(",")[0].split(" ").slice(-1)[0];
-  const showAuthor = w >= 26 && author && it.kind === "book";
-  const avail = it.kind === "film" ? h - filmTop - 34 : h - 52 - (showAuthor ? Math.min(46, author.length * 5 + 10) : 0);
-  const fs = Math.max(8, Math.min(Math.floor(w * 0.42), 13, Math.floor(avail / Math.max(4, stitle.length * 0.68))));
+  const authorLen = Math.min(46, author.length * 5 + 10);
+  const titleNeed = stitle.length * 0.86 * 9 + 16;
+  const showAuthor = w >= 26 && author && it.kind === "book" && h - 60 - authorLen >= titleNeed;
+  const avail = it.kind === "film" ? h - filmTop - 34 : h - 60 - (showAuthor ? authorLen : 0);
+  const fs = Math.max(7, Math.min(Math.floor(w * 0.4), 12, Math.floor((avail - 16) / Math.max(4, stitle.length * 0.86))));
   const others = (it.ratings || []).some(r => r.user_id !== it.owner);
   const seasons = it.kind === "show" && it.year ? `<span class="seasons">${esc(it.year)}</span>` : "";
   const strip = it.kind === "film" && it.cover ? `<span class="poster-strip"><img src="${esc(it.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></span>` : "";
@@ -866,8 +870,8 @@ function startMotes() {
   const c = $("#motes"); const x = c.getContext("2d"); let W, H, dpr;
   const resize = () => { dpr = Math.min(2, devicePixelRatio || 1); W = c.width = innerWidth * dpr; H = c.height = innerHeight * dpr; };
   resize(); addEventListener("resize", resize);
-  const N = innerWidth < 700 ? 26 : 50;
-  const motes = Array.from({ length: N }, () => ({ x: Math.random(), y: Math.random(), r: Math.random() * 1.6 + .4, vx: (Math.random() - .5) * .00012, vy: -Math.random() * .00018 - .00003, p: Math.random() * 6.28, fire: Math.random() < .18 }));
+  const N = innerWidth < 700 ? 22 : 40;
+  const motes = Array.from({ length: N }, () => ({ x: Math.random(), y: Math.random(), r: Math.random() * 1.6 + .4, vx: (Math.random() - .5) * .00012, vy: -Math.random() * .00018 - .00003, p: Math.random() * 6.28, fire: false }));
   let last = performance.now();
   const tick = t => {
     const dt = Math.min(50, t - last); last = t;
@@ -875,7 +879,7 @@ function startMotes() {
     for (const m of motes) {
       m.x += m.vx * dt + Math.sin((t / 3000) + m.p) * .00005 * dt; m.y += m.vy * dt; m.p += .0008 * dt;
       if (m.y < -.02) { m.y = 1.02; m.x = Math.random(); } if (m.x < -.02) m.x = 1.02; if (m.x > 1.02) m.x = -.02;
-      const a = m.fire ? (.35 + .65 * Math.max(0, Math.sin(m.p * 2))) : .25 + .2 * Math.sin(m.p);
+      const a = m.fire ? (.35 + .65 * Math.max(0, Math.sin(m.p * 2))) : .14 + .12 * Math.sin(m.p);
       const R = (m.fire ? m.r * 2.2 : m.r) * dpr;
       const g = x.createRadialGradient(m.x * W, m.y * H, 0, m.x * W, m.y * H, R * 4);
       g.addColorStop(0, m.fire ? `rgba(220,255,150,${a})` : `rgba(255,220,150,${a})`); g.addColorStop(1, "rgba(255,200,120,0)");

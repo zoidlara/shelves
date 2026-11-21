@@ -1,19 +1,19 @@
 // Handmade covers, spine colours, and the shareable card.
 
 export const PALETTE = [
-  { bg: "#2f4a34", ink: "#e9d9a6" }, // forest
-  { bg: "#6b2430", ink: "#f0d79a" }, // burgundy
-  { bg: "#23324a", ink: "#e8d49b" }, // midnight
-  { bg: "#4b2e4f", ink: "#efd8a8" }, // plum
-  { bg: "#8a3f22", ink: "#f4dfae" }, // rust
-  { bg: "#22504f", ink: "#ead8a2" }, // deep teal
-  { bg: "#5a3b24", ink: "#f0d9a4" }, // walnut
-  { bg: "#a3772c", ink: "#2a1a0e" }, // ochre
-  { bg: "#4f6b3a", ink: "#f2e2b5" }, // moss
-  { bg: "#d8c79f", ink: "#3b2716" }, // vellum
-  { bg: "#9c5463", ink: "#f8e6c2" }, // dusty rose
-  { bg: "#1f2b22", ink: "#cdb675" }, // ink green
-];
+  { bg: "#4a1418", ink: "#d9b26a" }, // oxblood
+  { bg: "#1d3226", ink: "#d1ad66" }, // bottle green
+  { bg: "#1a2233", ink: "#cfae6c" }, // ink navy
+  { bg: "#16130f", ink: "#c9a35c" }, // black calf
+  { bg: "#6b3a1f", ink: "#e6c98a" }, // cognac
+  { bg: "#3a2030", ink: "#d4b06e" }, // aubergine
+  { bg: "#2e3236", ink: "#cdb27a" }, // slate
+  { bg: "#5e1f26", ink: "#e0bd7a" }, // claret
+  { bg: "#3b3a22", ink: "#d8bd7c" }, // olive
+  { bg: "#8a7656", ink: "#1e140c" }, // tan vellum
+  { bg: "#2a1b12", ink: "#c79f5a" }, // dark walnut
+  { bg: "#c2b28c", ink: "#2a1a0e" }, // aged paper
+]
 
 export function hash(str = "") {
   let h = 2166136261;
@@ -30,6 +30,8 @@ const EMBLEMS = {
   leaf: '<path d="M20 4C10 4 4 9 4 16c0 1.3.3 2.5.8 3.5C6 13 10 10 15 8c-4 3-7 6.5-8.6 12 .9.3 1.9.5 2.9.5C16 20.5 20 14 20 4z"/>',
   key: '<path d="M8 4a5 5 0 0 0-1 9.9V22h3v-2h2v-2h-2v-1.5h2v-2h-2v-.6A5 5 0 0 0 8 4zm0 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/>',
   crown: '<path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/>',
+  laurel: '<path d="M12 21V9M12 21c-4-1-7-4-8-9 2 0 4 1 5 3-2-2-3-5-2-8 2 1 3 3 3 5 0-2 1-4 2-6M12 21c4-1 7-4 8-9-2 0-4 1-5 3 2-2 3-5 2-8-2 1-3 3-3 5 0-2-1-4-2-6" fill="none" stroke="currentColor" stroke-width="1.4"/>',
+  skull: '<path d="M12 3C7 3 4 6.5 4 11c0 2.6 1.3 4.4 3 5.4V20h10v-3.6c1.7-1 3-2.8 3-5.4 0-4.5-3-8-8-8zM8.5 10h3v3h-3zm4 0h3v3h-3zM12 14l1.2 2h-2.4z" fill-rule="evenodd"/>',
   mushroom: '<path d="M12 3C6.5 3 3 6.8 3 11h18c0-4.2-3.5-8-9-8zM9.5 12h5l.8 7.5a1.5 1.5 0 0 1-1.5 1.5h-3.6a1.5 1.5 0 0 1-1.5-1.5z"/>',
   flower: '<path d="M12 8.5a3 3 0 1 0 0 7 3 3 0 0 0 0-7zm0-6.5c1.7 0 3 1.8 3 4.2l-.1.8a4.6 4.6 0 0 0-5.8 0L9 6.2C9 3.8 10.3 2 12 2zm0 20c-1.7 0-3-1.8-3-4.2l.1-.8a4.6 4.6 0 0 0 5.8 0l.1.8c0 2.4-1.3 4.2-3 4.2zM2 12c0-1.7 1.8-3 4.2-3l.8.1a4.6 4.6 0 0 0 0 5.8l-.8.1C3.8 15 2 13.7 2 12zm20 0c0 1.7-1.8 3-4.2 3l-.8-.1a4.6 4.6 0 0 0 0-5.8l.8-.1C20.2 9 22 10.3 22 12z"/>',
   feather: '<path d="M20.5 3.5C14 3.5 8 8 6.5 14.5L4 20l1.2.8 2.3-3.4c5.5-.5 10.6-4.6 13-13.9zM8.9 15.6c.7-2.6 2.4-5.3 5.1-7.6-1.6 2.6-2.8 5-3.4 7.4z"/>',
@@ -54,9 +56,10 @@ export function emblemFor(item) {
   if (/mystery|thriller|crime|secret/.test(g)) return "key";
   if (/night|moon|vampire|gothic|horror/.test(g)) return "moon";
   if (/nature|cottage|garden|forest/.test(g)) return "leaf";
-  if (/fairy|fae|whimsical/.test(g)) return "mushroom";
+  if (/fairy|fae|whimsical|myth|greek|classic/.test(g)) return "laurel";
+  if (/death|dark|murder|gothic/.test(g)) return "skull";
   if (/poetry|classic|histor/.test(g)) return "feather";
-  return ["star", "moon", "leaf", "key", "crown", "mushroom", "flower", "feather"][hash(item.title) % 8];
+  return ["star", "moon", "laurel", "key", "crown", "skull", "feather", "laurel"][hash(item.title) % 8];
 }
 
 const SOURCE_RIBBON = { ao3: ["AO3", "#990000"], wattpad: ["Wattpad", "#ff6122"], tumblr: ["Tumblr", "#36465d"], goodreads: ["Goodreads", "#7a5b3a"] };
@@ -70,10 +73,10 @@ export function handmadeCover(item) {
   const title = esc(item.title);
   const size = item.title.length > 38 ? "xs" : item.title.length > 22 ? "sm" : "md";
   return `<div class="handmade k-${item.kind}" style="--hb:${p.bg};--hi:${p.ink}">
-    <div class="hm-frame"><span class="hm-c tl"></span><span class="hm-c tr"></span><span class="hm-c bl"></span><span class="hm-c br"></span></div>
+    <div class="hm-frame"><span class="hm-c tl"></span><span class="hm-c tr"></span><span class="hm-c bl"></span><span class="hm-c br"></span></div><div class="hm-band top"></div><div class="hm-band bottom"></div>
     ${emblemSVG(em, "hm-emblem")}
     <div class="hm-title ${size}">${title}</div>
-    <div class="hm-rule"><i></i>${emblemSVG("star", "hm-star")}<i></i></div>
+    <div class="hm-rule"><i></i><b class="hm-lozenge"></b><i></i></div>
     <div class="hm-author">${esc(item.creator || kindLabel)}</div>
     ${item.year ? `<div class="hm-year">${esc(item.year)}</div>` : ""}
     ${rib ? `<div class="hm-ribbon" style="--rb:${rib[1]}">${rib[0]}</div>` : ""}
@@ -124,10 +127,10 @@ export function sampleColor(url) {
 // Darken/desaturate a bit so every spine sits in the cosy candlelit palette.
 function toSpine([r, g, b]) {
   let [h, s, l] = rgbToHsl(r, g, b);
-  s = Math.min(s, 0.55) * 0.9; l = Math.min(Math.max(l * 0.78, 0.16), 0.5);
+  s = Math.min(s, 0.45) * 0.8; l = Math.min(Math.max(l * 0.62, 0.12), 0.36);
   const [R, G, B] = hslToRgb(h, s, l);
   const hex = "#" + [R, G, B].map(v => Math.round(v).toString(16).padStart(2, "0")).join("");
-  return { bg: hex, ink: l > 0.42 ? "#2a1a0e" : "#f0dca8", hue: h, lum: l };
+  return { bg: hex, ink: l > 0.42 ? "#2a1a0e" : "#d9b878", hue: h, lum: l };
 }
 function rgbToHsl(r, g, b) {
   r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let h = 0, s = 0; const l = (mx + mn) / 2;
@@ -165,7 +168,7 @@ function drawHandmade(ctx, item, x, y, w, h) {
   ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
   ctx.strokeStyle = p.ink; ctx.globalAlpha = .8; ctx.lineWidth = 3; ctx.strokeRect(x + 22, y + 22, w - 44, h - 44); ctx.lineWidth = 1; ctx.strokeRect(x + 32, y + 32, w - 64, h - 64); ctx.globalAlpha = 1;
   ctx.fillStyle = p.ink; ctx.textAlign = "center";
-  ctx.font = "600 44px 'Cinzel Decorative', serif";
+  ctx.font = "600 44px 'Playfair Display', serif";
   const lines = wrap(ctx, item.title, w - 100).slice(0, 4);
   lines.forEach((l, i) => ctx.fillText(l, x + w / 2, y + h * 0.38 + i * 54));
   ctx.font = "italic 28px 'Cormorant Garamond', serif"; ctx.fillText(item.creator || "", x + w / 2, y + h - 70);
@@ -176,16 +179,17 @@ export async function makeShareCard(item, ownerName) {
   try { await document.fonts.ready; } catch {}
   // background
   const bg = ctx.createRadialGradient(W / 2, H * 0.35, 80, W / 2, H * 0.5, H * 0.85);
-  bg.addColorStop(0, "#3a4a2c"); bg.addColorStop(0.55, "#1d2617"); bg.addColorStop(1, "#0c100a");
+  bg.addColorStop(0, "#3a1a16"); bg.addColorStop(0.55, "#1a0f0c"); bg.addColorStop(1, "#080605");
   ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
   // sparkles
   for (let i = 0; i < 90; i++) {
     const x = (hash(item.title + i) % W), y = (hash(i + item.title) % H), r = (hash("r" + i) % 30) / 10 + .4;
-    ctx.fillStyle = `rgba(255,214,140,${0.15 + (i % 5) / 12})`; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = `rgba(230,200,150,${0.05 + (i % 5) / 30})`; ctx.fillRect(x, y, r, r);
   }
   // gold frame
-  ctx.strokeStyle = "#c9a45c"; ctx.lineWidth = 4; ctx.strokeRect(40, 40, W - 80, H - 80);
-  ctx.lineWidth = 1.5; ctx.strokeRect(56, 56, W - 112, H - 112);
+  ctx.strokeStyle = "#b08d57"; ctx.lineWidth = 3; ctx.strokeRect(40, 40, W - 80, H - 80);
+  ctx.lineWidth = 1; ctx.strokeRect(52, 52, W - 104, H - 104);
+  for (const [x, y] of [[40, 40], [W - 40, 40], [40, H - 40], [W - 40, H - 40]]) { ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 4); ctx.fillStyle = "#b08d57"; ctx.fillRect(-9, -9, 18, 18); ctx.restore(); }
   // cover
   const cw = 420, ch = 630, cx = (W - cw) / 2, cy = 120;
   ctx.save(); ctx.shadowColor = "rgba(0,0,0,.7)"; ctx.shadowBlur = 50; ctx.shadowOffsetY = 24; ctx.fillStyle = "#000"; ctx.fillRect(cx, cy, cw, ch); ctx.restore();
@@ -197,18 +201,18 @@ export async function makeShareCard(item, ownerName) {
   // spine shade on cover
   const sh = ctx.createLinearGradient(cx, 0, cx + 30, 0); sh.addColorStop(0, "rgba(0,0,0,.45)"); sh.addColorStop(1, "rgba(0,0,0,0)"); ctx.fillStyle = sh; ctx.fillRect(cx, cy, 30, ch);
   // text
-  ctx.textAlign = "center"; ctx.fillStyle = "#f3e2b3";
-  ctx.font = "700 54px 'Cinzel Decorative', serif";
+  ctx.textAlign = "center"; ctx.fillStyle = "#eadbb8";
+  ctx.font = "700 54px 'Playfair Display', serif";
   const tl = wrap(ctx, item.title, W - 200).slice(0, 2); tl.forEach((l, i) => ctx.fillText(l, W / 2, 840 + i * 62));
   let y = 840 + tl.length * 62;
   ctx.font = "italic 34px 'Cormorant Garamond', serif"; ctx.fillStyle = "#d9c08a";
   ctx.fillText([item.creator, item.year].filter(Boolean).join(" · "), W / 2, y + 4); y += 56;
   const stars = item.myStars || 0;
-  if (stars) { ctx.font = "40px serif"; ctx.fillStyle = "#e8b84a"; ctx.fillText("★".repeat(stars) + "☆".repeat(5 - stars), W / 2, y + 6); y += 56; }
+  if (stars) { ctx.font = "40px serif"; ctx.fillStyle = "#c9a35c"; ctx.fillText("★".repeat(stars) + "☆".repeat(5 - stars), W / 2, y + 6); y += 56; }
   ctx.font = "30px 'Cormorant Garamond', serif"; ctx.fillStyle = "#e8dcc0";
   const desc = (item.description || "").slice(0, 240) + ((item.description || "").length > 240 ? "…" : "");
   wrap(ctx, desc, W - 260).slice(0, 4).forEach((l, i) => ctx.fillText(l, W / 2, y + 20 + i * 40));
-  ctx.font = "600 26px 'Cinzel Decorative', serif"; ctx.fillStyle = "#c9a45c";
-  ctx.fillText(`✦ from ${ownerName} shelf ✦`, W / 2, H - 92);
+  ctx.font = "600 24px 'Cinzel', serif"; ctx.fillStyle = "#b08d57";
+  ctx.fillText(`EX LIBRIS · ${ownerName.toUpperCase()} SHELF`, W / 2, H - 92);
   return new Promise(res => c.toBlob(res, "image/png"));
 }
