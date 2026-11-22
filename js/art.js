@@ -39,6 +39,11 @@ const WIN = {
   celestial: { shape: "round", sky: ["#0a1030", "#141c48", "#0a0e26"], moon: "#f4ecd0", weather: "stars", frame: "#0a0c18", trim: "#b8975a" },
   cabin: { shape: "rect", sky: ["#141c30", "#1e2a44", "#2c3446"], moon: "#f0ecd8", weather: "snow", frame: "#3a2412", trim: "#6a4426", trees: true },
   modern: { shape: "tall", sky: ["#b9d6ec", "#d6e7f2", "#eef4f6"], moon: null, weather: "clouds", frame: "#2a2a2a", trim: "#d8d4cc" },
+  moonwood: { shape: "arch", sky: ["#0c1c26", "#16323c", "#0c1c18"], moon: "#f2f6f2", bigMoon: true, weather: "fireflies", frame: "#101a14", trim: "#8a9a90", trees: true, starsN: 22 },
+  starfall: { shape: "round", sky: ["#0a1030", "#151d4a", "#0c1626"], moon: "#f4ecd0", weather: "stars", frame: "#0c140e", trim: "#b8975a", trees: true, shooting: true },
+  elderglow: { shape: "arch", sky: ["#061418", "#0a2628", "#081412"], moon: "#e8fff6", weather: "stars", frame: "#0a1614", trim: "#6ab8a4", trees: true, aurora: true },
+  fernstar: { shape: "arch", sky: ["#0a1228", "#121c3a", "#0c1a1a"], moon: "#f4ecd0", weather: "stars", frame: "#1c1a14", trim: "#9a7a44", plants: true, greenhouse: true },
+  duskleaf: { shape: "arch", sky: ["#26164a", "#7a3a6a", "#e8905a"], moon: "#fff0d8", weather: "fireflies", frame: "#140e18", trim: "#7a5a3a", trees: true, starsN: 10 },
 };
 const SHAPES = {
   lancet: "M10 240 V96 Q10 34 60 6 Q110 34 110 96 V240 Z",
@@ -52,13 +57,17 @@ export function windowSVG(i = 0, theme = "academia") {
   const mx = 78 - (i % 3) * 14, my = w.shape === "round" ? 60 + (i % 2) * 10 : 56 + (i % 2) * 18;
   const stars = (n, top = 240) => Array.from({ length: n }, (_, k) => `<rect x="${(k * 47 + i * 19) % 116 + 2}" y="${(k * 71 + i * 23) % top}" width="${k % 5 ? 1.2 : 2}" height="${k % 5 ? 1.2 : 2}" fill="#fff" opacity="${.4 + (k % 3) * .2}"/>`).join("");
   let scene = "";
-  if (w.weather === "stars") scene += stars(46, 160) + `<path d="M24 54 L40 40 L58 50 L74 34 M40 40 L36 22" stroke="#cdd6ff" stroke-width=".5" opacity=".5"/>`;
-  else if (w.weather !== "clouds") scene += stars(8);
-  if (w.moon) scene += w.weather === "stars"
+  if (w.weather === "stars") scene += stars(46, 160) + (w.aurora ? "" : `<path d="M24 54 L40 40 L58 50 L74 34 M40 40 L36 22" stroke="#cdd6ff" stroke-width=".5" opacity=".5"/>`);
+  else if (w.weather !== "clouds") scene += stars(w.starsN || 8, w.starsN ? 130 : 240);
+  if (w.aurora) scene += `<path d="M-10 70 C 20 40, 50 96, 80 56 S 128 44, 130 66 L130 116 C 100 92, 64 136, 30 104 S -10 112, -10 112Z" fill="url(#${id}a)" opacity=".6"/>`;
+  if (w.shooting) scene += `<line class="shoot" style="animation-delay:${-i * 1.7}s" x1="96" y1="20" x2="70" y2="38" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>`;
+  if (w.moon && w.bigMoon) scene += `<circle cx="${mx - 4}" cy="${my + 8}" r="44" fill="${w.moon}" opacity=".07"/><circle cx="${mx - 4}" cy="${my + 8}" r="17" fill="${w.moon}"/><circle cx="${mx - 9}" cy="${my + 4}" r="3" fill="#c8d0cc" opacity=".6"/><circle cx="${mx + 2}" cy="${my + 13}" r="4" fill="#c8d0cc" opacity=".5"/>`;
+  else if (w.moon) scene += w.weather === "stars"
     ? `<circle cx="${mx}" cy="${my}" r="12" fill="${w.moon}"/><circle cx="${mx + 5}" cy="${my - 3}" r="11" fill="${w.sky[1]}"/>`
     : `<circle cx="${mx}" cy="${my}" r="11" fill="${w.moon}" opacity=".85"/><circle cx="${mx}" cy="${my}" r="30" fill="${w.moon}" opacity=".06"/>`;
   if (w.weather === "clouds") scene += `<g fill="#fff" opacity=".85"><ellipse cx="${30 + (i * 17) % 50}" cy="60" rx="22" ry="8"/><ellipse cx="${44 + (i * 17) % 50}" cy="54" rx="14" ry="9"/><ellipse cx="${80 - (i * 11) % 40}" cy="120" rx="18" ry="6"/></g>`;
   if (w.trees) scene += `<path d="M0 240 V200 L10 180 L20 200 L26 170 L38 200 L48 176 L60 204 L70 168 L82 202 L92 182 L104 206 L114 174 L120 196 V240 Z" fill="${theme === "cabin" ? "#0c1420" : "#06120c"}"/>` + (theme === "cabin" ? `<path d="M0 240 V226 Q60 214 120 226 V240 Z" fill="#dfe6ee"/>` : "");
+  if (w.plants) scene += `<g fill="#0a1c10">${[[8, 1], [30, -1], [52, 1], [74, -1], [96, 1], [114, -1]].map(([x, f], k) => `<path transform="translate(${x} 240) scale(${f} 1)" d="M0 0 C -2 -30, -14 -44, -22 -50 C -10 -42, -4 -30, -2 -14 C -4 -40, 2 -62, 10 -74 C 4 -56, 2 -36, 2 -12 C 8 -30, 18 -38, 26 -40 C 16 -32, 8 -18, 4 0Z"/>`).join("")}</g>`;
   if (w.weather === "rain") scene += `<g class="rain">${Array.from({ length: 16 }, (_, k) => `<line x1="${(k * 37 + i * 13) % 120}" y1="${(k * 53) % 240}" x2="${(k * 37 + i * 13) % 120 - 3}" y2="${(k * 53) % 240 + 18}" stroke="#a9b8c9" stroke-width=".7" opacity=".35"/>`).join("")}</g>`;
   if (w.weather === "snow") scene += `<g class="snow">${Array.from({ length: 22 }, (_, k) => `<circle cx="${(k * 37 + i * 13) % 120}" cy="${(k * 53) % 240}" r="${k % 3 ? 1.1 : 1.7}" fill="#fff" opacity=".8"/>`).join("")}</g>`;
   if (w.weather === "fireflies") scene += Array.from({ length: 9 }, (_, k) => `<circle class="ff" style="animation-delay:${-k * .5}s" cx="${(k * 41 + i * 17) % 110 + 5}" cy="${150 + (k * 29) % 80}" r="1.6" fill="#e8ff9a"/>`).join("");
@@ -70,14 +79,16 @@ export function windowSVG(i = 0, theme = "academia") {
     rect: `<path d="M60 30 V240"/><path d="M8 100 H112"/><path d="M8 170 H112"/>`,
     tall: `<path d="M12 150 H108"/>`,
   }[w.shape];
+  const bars2 = w.greenhouse ? `<path d="M35 20 V240 M85 20 V240 M10 90 H110 M10 130 H110 M10 170 H110 M10 210 H110" stroke-width="2.5"/>` : "";
   const outer = `<path d="${clip}" fill="${w.frame}" stroke="${w.frame}" stroke-width="16" stroke-linejoin="round"/>`;
   const sill = w.shape === "round" ? "" : `<rect x="0" y="234" width="120" height="6" fill="${w.trim}"/>`;
   return `<div class="window w-${w.shape}"><svg viewBox="0 0 120 240" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
     <defs><linearGradient id="${id}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${w.sky[0]}"/><stop offset=".6" stop-color="${w.sky[1]}"/><stop offset="1" stop-color="${w.sky[2]}"/></linearGradient>
+    <linearGradient id="${id}a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5affc8" stop-opacity=".0"/><stop offset=".35" stop-color="#5affc8" stop-opacity=".7"/><stop offset=".7" stop-color="#9a6aff" stop-opacity=".55"/><stop offset="1" stop-color="#9a6aff" stop-opacity="0"/></linearGradient>
     <clipPath id="${id}c"><path d="${clip}"/></clipPath></defs>
     ${outer}
     <g clip-path="url(#${id}c)"><rect width="120" height="240" fill="url(#${id}g)"/>${scene}</g>
-    <g fill="none" stroke="${w.frame}" stroke-width="${w.shape === "tall" ? 4 : 5}" clip-path="url(#${id}c)">${bars}</g>
+    <g fill="none" stroke="${w.frame}" stroke-width="${w.shape === "tall" ? 4 : 5}" clip-path="url(#${id}c)">${bars}${bars2}</g>
     <path d="${clip}" fill="none" stroke="${w.trim}" stroke-width="${w.shape === "tall" ? 6 : 2}"/>${sill}
   </svg></div>`;
 }
@@ -135,6 +146,9 @@ export const SHARED_DEFS = `<svg width="0" height="0" style="position:absolute" 
   <radialGradient id="g-moon" cx=".38" cy=".32" r=".78"><stop offset="0" stop-color="#f6f4ec"/><stop offset=".6" stop-color="#c8c5ba"/><stop offset="1" stop-color="#5e5c56"/></radialGradient>
   <linearGradient id="g-crystal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#eedcff"/><stop offset=".4" stop-color="#9c6ad6"/><stop offset="1" stop-color="#3e2270"/></linearGradient>
   <radialGradient id="g-glow-green" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#e6ff9a" stop-opacity=".5"/><stop offset=".45" stop-color="#b8f070" stop-opacity=".14"/><stop offset="1" stop-color="#b8f070" stop-opacity="0"/></radialGradient>
+  <radialGradient id="g-glow-teal" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#8affe0" stop-opacity=".5"/><stop offset=".45" stop-color="#5ae8c8" stop-opacity=".14"/><stop offset="1" stop-color="#5ae8c8" stop-opacity="0"/></radialGradient>
+  <radialGradient id="g-shroom" cx=".45" cy=".35" r=".7"><stop offset="0" stop-color="#e8fff8"/><stop offset=".45" stop-color="#7ff0d8"/><stop offset="1" stop-color="#1a8a7a"/></radialGradient>
+  <radialGradient id="g-shroom-v" cx=".45" cy=".35" r=".7"><stop offset="0" stop-color="#f6eaff"/><stop offset=".45" stop-color="#c49aff"/><stop offset="1" stop-color="#5a2aa0"/></radialGradient>
   <radialGradient id="g-glow-cool" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#dfe8ff" stop-opacity=".35"/><stop offset=".45" stop-color="#b8c8ff" stop-opacity=".1"/><stop offset="1" stop-color="#b8c8ff" stop-opacity="0"/></radialGradient>
 </defs></svg>`;
 
@@ -217,6 +231,11 @@ const OBJECTS = {
     <path d="M8 33 H44 V88 Q44 95 37 95 H15 Q8 95 8 88 Z" fill="#dff2e8" opacity=".14" stroke="#eef8f2" stroke-opacity=".5"/>
     ${[[18, 50], [32, 44], [26, 64], [36, 72], [16, 80], [28, 84], [22, 40]].map(([x, y], k) => `<circle class="ff" style="animation-delay:${-k * .4}s" cx="${x}" cy="${y}" r="1.8" fill="#f2ffb0"/>`).join("")}
     <path d="M13 40 C 12 60, 12 76, 14 88" stroke="#fff" stroke-opacity=".35" stroke-width="2" fill="none"/>`),
+  glowshrooms: () => svgObj("glowshrooms", 70, 74, `
+    <circle class="halo" cx="34" cy="46" r="42" fill="url(#g-glow-teal)"/>
+    <path d="M3 62 Q3 54 11 54 H60 Q67 54 67 62 Q67 71 60 71 H11 Q3 71 3 62Z" fill="url(#g-wood)"/><ellipse cx="60" cy="62.5" rx="5" ry="8" fill="#7a5a36"/><ellipse cx="60" cy="62.5" rx="2.6" ry="4.5" fill="none" stroke="#4a3018" stroke-width=".8"/>
+    <ellipse cx="22" cy="54" rx="14" ry="3.6" fill="#3a6a2c"/><ellipse cx="46" cy="54.5" rx="10" ry="3" fill="#4a7a34"/>
+    ${[[18, 54, 22, "g-shroom", 2.8, 11], [30, 54, 14, "g-shroom", 2.2, 8], [46, 54, 18, "g-shroom-v", 2.4, 9], [55, 54, 9, "g-shroom", 1.6, 5.5], [10, 54, 9, "g-shroom-v", 1.6, 5]].map(([x, y, h, g, sw, r]) => `<path d="M${x} ${y} V${y - h}" stroke="#d8fff4" stroke-width="${sw}"/><path d="M${x - r} ${y - h + 1} Q${x} ${y - h - r * 1.5} ${x + r} ${y - h + 1} Z" fill="url(#${g})"/>`).join("")}`),
   /* celestial */
   telescope: () => svgObj("telescope", 92, 142, `
     <path d="M46 96 L14 140 M46 96 L78 140 M46 96 L46 140" stroke="url(#g-wood)" stroke-width="4"/>
@@ -346,6 +365,9 @@ function upright(seed, room) {
 function pickObject(seed, room, used = new Set()) {
   const OBJ_ORDER = DECOR.objects;
   const start = hash("o" + seed) % OBJ_ORDER.length;
+  // The first object is the room's signature piece: make sure it shows up once.
+  const sig = OBJ_ORDER[0];
+  if (sig && !used.has(sig)) { const o = OBJECTS[sig](); if (o.w <= room) { used.add(sig); return o; } }
   for (const fresh of [true, false]) {
     for (let k = 0; k < OBJ_ORDER.length; k++) {
       const name = OBJ_ORDER[(start + k) % OBJ_ORDER.length];

@@ -7,6 +7,66 @@ const GF = q => `https://fonts.googleapis.com/css2?${q}&display=swap`;
 const P = list => list.map(([bg, ink]) => ({ bg, ink }));
 
 export const THEMES = {
+  moonwood: {
+    name: "Moonwood", hallName: "Moonwood", blurb: "Mossy wood under a silver moon, ivy, fireflies and stars.",
+    swatch: ["#1f3a2c", "#c4d2c8", "#24304a"],
+    fonts: GF("family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Cormorant+SC:wght@500;600;700"),
+    kicker: "A library in the moonlit wood", sub: "Where the moss is soft, the moon is full, and every shelf glows a little.",
+    palette: P([["#1f3a2c", "#dfe8e0"], ["#24304a", "#dfe6ee"], ["#2c4a3a", "#e6eee6"], ["#3a3450", "#e2dcec"], ["#5a6a64", "#f0f4f0"], ["#14201a", "#c8d4cc"], ["#1a2a3a", "#d4dce8"], ["#4a5a3a", "#eef0e0"], ["#b8c4bc", "#1a2420"], ["#2a2030", "#d8d0e0"]]),
+    bindings: ["b-cloth", "b-leather", "b-cloth", "b-vellum", "b-cloth", "b-leather"],
+    decor: { objects: ["moon", "fern", "cloche", "fireflyjar", "crystal", "starlantern", "ink"], tops: ["fireflyjar", "crystal", "candle"],
+      cols: ["#1f3a2c", "#24304a", "#2c4a3a", "#3a3450", "#14201a", "#1a2a3a", "#4a5a3a", "#2a2030"], bindings: ["b-cloth", "b-leather", "b-cloth", "b-vellum"] },
+    motes: [{ kind: "firefly", n: 26, rgb: "214,255,170" }, { kind: "twinkle", n: 30, rgb: "220,232,255" }],
+    vines: true, sconces: true,
+  },
+  starfall: {
+    name: "Starfall Hollow", hallName: "Starfall Hollow", blurb: "A forest clearing at night, the sky behind every shelf, shooting stars.",
+    swatch: ["#141c3a", "#d6ba78", "#1f3a24"],
+    fonts: GF("family=Marcellus&family=Marcellus+SC&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500"),
+    kicker: "Where the stars come down to read", sub: "A clearing in the woods, a sky full of stars, and a story for every one of them.",
+    palette: P([["#141c3a", "#d8c088"], ["#1f3a24", "#d8c98a"], ["#22285a", "#e0c890"], ["#2c4a2e", "#e0d39a"], ["#3a2a5e", "#e6d09a"], ["#18302c", "#cfd8a0"], ["#4a3420", "#d9c48a"], ["#0e1020", "#cfb67a"], ["#5a6478", "#f0e8d0"], ["#6e2a1e", "#ecd8a0"]]),
+    bindings: ["b-cloth", "b-leather", "b-cloth", "b-cloth", "b-leather", "b-vellum"],
+    decor: { objects: ["telescope", "cloche", "starlantern", "fern", "armillary", "crystal", "moon"], tops: ["starlantern", "crystal", "fireflyjar"],
+      cols: ["#141c3a", "#1f3a24", "#22285a", "#2c4a2e", "#3a2a5e", "#18302c", "#0e1020", "#4a3420"], bindings: ["b-cloth", "b-leather", "b-cloth"] },
+    motes: [{ kind: "twinkle", n: 46, rgb: "225,232,255" }, { kind: "firefly", n: 14, rgb: "214,255,150" }, { kind: "shooting", n: 2, rgb: "255,250,235" }],
+    vines: true, sconces: false,
+  },
+  elderglow: {
+    name: "Elderglow", hallName: "Elderglow", blurb: "Teal and violet magic, glowing mushrooms, crystals and northern lights.",
+    swatch: ["#0e3a38", "#96e2cc", "#3a2a6a"],
+    fonts: GF("family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Cormorant+SC:wght@500;600;700"),
+    kicker: "Under the northern lights", sub: "Glowing mushrooms, humming crystals, and books that seem to read you back.",
+    palette: P([["#0e3a38", "#bff0e2"], ["#3a2a6a", "#e0d4ff"], ["#1a4a3a", "#cdf2dc"], ["#4a2050", "#f0d4f4"], ["#123040", "#c4e8f0"], ["#2a5a54", "#e6fff6"], ["#24183a", "#d4c4f0"], ["#0a2420", "#a8e0cc"], ["#6a5aa0", "#f4f0ff"], ["#8ac8b8", "#0a2420"]]),
+    bindings: ["b-cloth", "b-leather", "b-cloth", "b-cloth", "b-leather", "b-vellum"],
+    decor: { objects: ["glowshrooms", "crystal", "moon", "fireflyjar", "armillary", "starlantern", "fern"], tops: ["crystal", "fireflyjar", "starlantern"],
+      cols: ["#0e3a38", "#3a2a6a", "#1a4a3a", "#4a2050", "#123040", "#24183a", "#0a2420", "#2a5a54"], bindings: ["b-cloth", "b-leather", "b-cloth"] },
+    motes: [{ kind: "firefly", n: 24, rgb: "150,255,225" }, { kind: "firefly", n: 10, rgb: "200,160,255" }, { kind: "twinkle", n: 24, rgb: "220,255,245" }],
+    vines: true, sconces: false,
+  },
+  fernstar: {
+    name: "The Fern & Star", hallName: "The Fern & Star", blurb: "A glass greenhouse at night: ferns, trailing plants, brass telescopes.",
+    swatch: ["#1d3226", "#dcb878", "#121c3a"],
+    fonts: GF("family=Josefin+Sans:wght@500;600;700"),
+    kicker: "A greenhouse for stories", sub: "Ferns on every shelf, stars through every pane, and a lamp left on for you.",
+    palette: P([["#1d3226", "#d1ad66"], ["#1a2233", "#cfae6c"], ["#2c4a2e", "#e0d39a"], ["#4a1418", "#d9b26a"], ["#3b3a22", "#d8bd7c"], ["#141c3a", "#d8c088"], ["#6b3a1f", "#e6c98a"], ["#18302c", "#cfd8a0"], ["#c2b28c", "#2a1a0e"], ["#22285a", "#e0c890"]]),
+    bindings: ["b-cloth", "b-leather", "b-cloth", "b-leather", "b-vellum", "b-cloth"],
+    decor: { objects: ["pothos", "fern", "telescope", "succulent", "moon", "cloche", "starlantern"], tops: ["succulent", "starlantern", "crystal"],
+      cols: ["#1d3226", "#1a2233", "#2c4a2e", "#4a1418", "#3b3a22", "#141c3a", "#6b3a1f", "#18302c"], bindings: ["b-cloth", "b-leather", "b-cloth", "b-vellum"] },
+    motes: [{ kind: "twinkle", n: 30, rgb: "230,236,255" }, { kind: "firefly", n: 16, rgb: "255,220,150" }],
+    vines: true, sconces: true,
+  },
+  duskleaf: {
+    name: "Duskleaf", hallName: "Duskleaf", blurb: "The forest at twilight: violet sky, warm lanterns, the first stars.",
+    swatch: ["#3a2050", "#f0be6e", "#2a4a3a"],
+    fonts: GF("family=Uncial+Antiqua&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Cormorant+SC:wght@500;600;700"),
+    kicker: "Just after sunset", sub: "Lanterns lit, the sky turning violet, and one more chapter before the stars come out.",
+    palette: P([["#3a2050", "#f0d8a8"], ["#5a2a4a", "#f4dcb0"], ["#2a4a3a", "#f0e0b0"], ["#7a3a3a", "#f6e0b8"], ["#1e2a44", "#ecd8b0"], ["#8a5a2a", "#fbe8c4"], ["#4a3a6a", "#f2e2c0"], ["#1a3a30", "#e6d8a8"], ["#c8a8c0", "#2a1830"], ["#2a1a2a", "#e0c890"]]),
+    bindings: ["b-cloth", "b-leather", "b-cloth", "b-vellum", "b-cloth", "b-leather"],
+    decor: { objects: ["lantern", "fireflyjar", "fern", "moon", "crystal", "starlantern", "cloche"], tops: ["fireflyjar", "crystal", "candle"],
+      cols: ["#3a2050", "#5a2a4a", "#2a4a3a", "#7a3a3a", "#1e2a44", "#4a3a6a", "#1a3a30", "#2a1a2a"], bindings: ["b-cloth", "b-leather", "b-cloth", "b-vellum"] },
+    motes: [{ kind: "firefly", n: 30, rgb: "255,205,120" }, { kind: "twinkle", n: 16, rgb: "255,240,230" }],
+    vines: true, sconces: true,
+  },
   academia: {
     name: "Dark Academia", blurb: "Oxblood leather, brass and a rainy night outside.",
     swatch: ["#4a1418", "#b08d57", "#1d3226"],
@@ -83,6 +143,8 @@ export const THEMES = {
 
 export const THEME_KEY = "shelves.theme";
 export const currentThemeId = () => (THEMES[document.documentElement.dataset.theme] ? document.documentElement.dataset.theme : "academia");
+// The five night-forest rooms shown first in the chooser; the older looks follow.
+export const NEW_ROOMS = ["moonwood", "starfall", "elderglow", "fernstar", "duskleaf"];
 export const theme = () => THEMES[currentThemeId()];
 export function savedTheme(fallback = "academia") {
   try { return localStorage.getItem(THEME_KEY) || fallback; } catch { return fallback; }

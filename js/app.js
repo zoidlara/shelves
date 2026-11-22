@@ -4,7 +4,7 @@ import { SEED_ITEMS } from "./seeds.js";
 import { HALL_NAME, STARTER_SHELF_FOR, DEFAULT_THEME } from "./config.js";
 import { esc, hash, paletteOf, seriesOf, coverHTML, sampleColor, emblemSVG, emblemFor, makeShareCard, hexHue } from "./covers.js";
 import { ICON, FLOURISH, SCONCE, windowSVG, vineSVG, SHARED_DEFS, fillBay } from "./art.js";
-import { THEMES, applyTheme, savedTheme, theme, currentThemeId } from "./themes.js";
+import { THEMES, NEW_ROOMS, applyTheme, savedTheme, theme, currentThemeId } from "./themes.js";
 
 /* ═══════════════ constants ═══════════════ */
 const KINDS = {
@@ -44,12 +44,15 @@ function colorOf(it) {
   return paletteOf(it);
 }
 
+// The name on the door: set it in config.js, or leave it empty to use the room's own name.
+const hallName = () => HALL_NAME || theme().hallName || "The Lantern Hall";
+function setBrand() { $("#brandName").textContent = hallName(); document.title = `${hallName()} · Shelves`; }
+
 /* ═══════════════ boot ═══════════════ */
 async function boot() {
   applyTheme(savedTheme(DEFAULT_THEME), false);
   document.body.insertAdjacentHTML("afterbegin", SHARED_DEFS);
-  $("#brandName").textContent = HALL_NAME;
-  document.title = `${HALL_NAME} · Shelves`;
+  setBrand();
   try { await db.init(); } catch (e) { console.error(e); }
   state.me = await db.currentProfile().catch(() => null);
   await refresh();
@@ -197,7 +200,7 @@ function renderHall() {
   view.innerHTML = `<section class="hall">
     <div class="hall-head">
       <div class="kicker">${esc(theme().kicker)}</div>
-      <h1 class="hall-title">${esc(HALL_NAME)}</h1>
+      <h1 class="hall-title">${esc(hallName())}</h1>
       ${FLOURISH}
       <p class="hall-sub">${esc(theme().sub)}</p>
     </div>
@@ -855,12 +858,12 @@ function openSuggest(kind = "book", preset = "") {
 function openInvite() {
   const link = `${siteBase()}#/join`;
   const w = openModal(`<h2>Invite a friend</h2>
-    <p class="lead">Anyone with this link can make a bookcase with their own name in ${esc(HALL_NAME)}. They’ll see every shelf here, and you can rate each other’s books and films.</p>
+    <p class="lead">Anyone with this link can make a bookcase with their own name in ${esc(hallName())}. They’ll see every shelf here, and you can rate each other’s books and films.</p>
     <div class="link-box"><code>${esc(link)}</code><button class="btn gold small" id="copyInv">${ICON.link} Copy</button></div>
     ${navigator.share ? `<p style="margin-top:14px"><button class="btn small" id="shareInv">${ICON.share} Send it…</button></p>` : ""}
     <p class="hint" style="margin-top:14px">Only people you send the link to will know the Hall exists.</p>`, { wax: ICON.link });
   $("#copyInv", w).addEventListener("click", async () => { try { await navigator.clipboard.writeText(link); toast("Invitation copied ✦"); } catch { prompt("Copy this link:", link); } });
-  const sh = $("#shareInv", w); if (sh) sh.addEventListener("click", () => navigator.share({ title: HALL_NAME, text: `Come build your bookcase next to mine in ${HALL_NAME}!`, url: link }).catch(() => {}));
+  const sh = $("#shareInv", w); if (sh) sh.addEventListener("click", () => navigator.share({ title: hallName(), text: `Come build your bookcase next to mine in ${hallName()}!`, url: link }).catch(() => {}));
 }
 
 function openAuth(which = "join") {
@@ -879,7 +882,7 @@ function openAuth(which = "join") {
     $$("[data-only]", w).forEach(el => (el.hidden = el.dataset.only !== which));
     $("#aName", w).required = $("#aUser", w).required = which === "join";
     $("#aTitle", w).textContent = which === "join" ? "Claim your alcove" : "Welcome back";
-    $("#aLead", w).textContent = which === "join" ? `Your bookcase will stand in ${HALL_NAME} next to your friends’.` : "Your candle’s still lit.";
+    $("#aLead", w).textContent = which === "join" ? `Your bookcase will stand in ${hallName()} next to your friends’.` : "Your candle’s still lit.";
     $("#aGo", w).textContent = which === "join" ? "Build my bookcase" : "Sign in";
   };
   paint();
@@ -929,10 +932,11 @@ function openAccount() {
 function openThemes() {
   const cur = currentThemeId();
   const w = openModal(`<h2>Change the room</h2><p class="lead">Pick a look for the Hall and every shelf in it. Only this browser changes.</p>
-    <div class="theme-grid">${Object.entries(THEMES).map(([id, t]) => `<button class="theme-card" data-theme-id="${id}" aria-pressed="${id === cur}">
+    <div class="theme-grid">${[...NEW_ROOMS, ...Object.keys(THEMES).filter(k => !NEW_ROOMS.includes(k))].map(id => [id, THEMES[id]]).map(([id, t]) => `<button class="theme-card" data-theme-id="${id}" aria-pressed="${id === cur}">
       <span class="sw">${t.swatch.map(c => `<i style="background:${c}"></i>`).join("")}</span><b>${esc(t.name)}</b><span>${esc(t.blurb)}</span></button>`).join("")}</div>`, { wide: true, wax: ICON.brush });
   $$(".theme-card", w).forEach(b => b.addEventListener("click", () => {
     applyTheme(b.dataset.themeId);
+    setBrand();
     $$(".theme-card", w).forEach(x => x.setAttribute("aria-pressed", x === b));
     route(true);
     toast(`Welcome to the ${THEMES[b.dataset.themeId].name} ✦`);
@@ -953,25 +957,37 @@ function startMotes() {
   const c = $("#motes"); const x = c.getContext("2d"); let W, H, dpr;
   const resize = () => { dpr = Math.min(2, devicePixelRatio || 1); W = c.width = innerWidth * dpr; H = c.height = innerHeight * dpr; };
   resize(); addEventListener("resize", resize);
-  let kind = null, motes = [], rgb = "255,220,150";
+  let sig = "", motes = [];
   const spawn = m => {
     const k = m.kind;
     Object.assign(m, { x: Math.random(), y: k === "ember" ? 1 + Math.random() * .2 : Math.random(), r: Math.random() * 1.6 + .4, p: Math.random() * 6.28,
       vx: (Math.random() - .5) * (k === "firefly" ? .00006 : .00012),
       vy: k === "twinkle" ? 0 : k === "ember" ? -Math.random() * .00012 - .00006 : k === "firefly" ? (Math.random() - .5) * .00005 : -Math.random() * .00018 - .00003 });
+    if (k === "shooting") Object.assign(m, { x: Math.random() * .8 + .1, y: Math.random() * .35, vx: -.00035 - Math.random() * .0002, vy: .00022 + Math.random() * .0001, life: 0, wait: 2000 + Math.random() * 7000 });
     return m;
   };
+  const layers = () => { const m = theme().motes; return Array.isArray(m) ? m : [m]; };
   const rebuild = () => {
-    const t = theme().motes; kind = t.kind; rgb = t.rgb;
-    const N = Math.round((innerWidth < 700 ? .55 : 1) * t.n);
-    motes = Array.from({ length: N }, () => spawn({ kind }));
+    const L = layers(); sig = JSON.stringify(L);
+    motes = L.flatMap(t => Array.from({ length: Math.round((innerWidth < 700 ? .55 : 1) * t.n) || (t.n ? 1 : 0) }, () => spawn({ kind: t.kind, rgb: t.rgb })));
   };
   let last = performance.now();
   const tick = t => {
-    if (theme().motes.kind !== kind) rebuild();
+    if (JSON.stringify(layers()) !== sig) rebuild();
     const dt = Math.min(50, t - last); last = t;
     x.clearRect(0, 0, W, H);
     for (const m of motes) {
+      const kind = m.kind;
+      if (kind === "shooting") {
+        if (m.wait > 0) { m.wait -= dt; continue; }
+        m.x += m.vx * dt; m.y += m.vy * dt; m.life += dt;
+        const a = Math.max(0, 1 - m.life / 1100);
+        const g = x.createLinearGradient(m.x * W, m.y * H, (m.x - m.vx * 260) * W, (m.y - m.vy * 260) * H);
+        g.addColorStop(0, `rgba(${m.rgb},${a})`); g.addColorStop(1, `rgba(${m.rgb},0)`);
+        x.strokeStyle = g; x.lineWidth = 1.6 * dpr; x.beginPath(); x.moveTo(m.x * W, m.y * H); x.lineTo((m.x - m.vx * 260) * W, (m.y - m.vy * 260) * H); x.stroke();
+        if (a <= 0) spawn(m);
+        continue;
+      }
       m.x += m.vx * dt + (kind === "twinkle" ? 0 : Math.sin((t / 3000) + m.p) * .00005 * dt); m.y += m.vy * dt; m.p += (kind === "twinkle" ? .0016 : .0008) * dt;
       if (m.y < -.02) { if (kind === "ember") spawn(m); else { m.y = 1.02; m.x = Math.random(); } }
       if (m.y > 1.25) m.y = -.02;
@@ -983,7 +999,7 @@ function startMotes() {
       else a = .14 + .12 * Math.sin(m.p);
       R *= dpr;
       const g = x.createRadialGradient(m.x * W, m.y * H, 0, m.x * W, m.y * H, R * 4);
-      g.addColorStop(0, `rgba(${rgb},${a})`); g.addColorStop(1, `rgba(${rgb},0)`);
+      g.addColorStop(0, `rgba(${m.rgb},${a})`); g.addColorStop(1, `rgba(${m.rgb},0)`);
       x.fillStyle = g; x.beginPath(); x.arc(m.x * W, m.y * H, R * 4, 0, 6.283); x.fill();
     }
     if (!document.hidden) requestAnimationFrame(tick); else setTimeout(() => requestAnimationFrame(tick), 500);
