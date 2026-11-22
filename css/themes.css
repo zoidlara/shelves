@@ -69,7 +69,6 @@ html[data-theme="forest"] .b-back { background:
     radial-gradient(60% 55% at 38% 40%, rgba(190, 240, 140, .12), transparent 70%),
     var(--panel-tex) 0 0 / 256px auto; }
 html[data-theme="forest"] .case-crown .dentils { background: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0) 0 9px, rgba(0, 0, 0, .7) 9px 12px), linear-gradient(180deg, rgba(200, 230, 140, .12), rgba(0, 0, 0, .45)), var(--wood-h) -40px -90px / 1024px auto; }
-html[data-theme="forest"] .label-holder { background: linear-gradient(180deg, #e6e0a8, #a49a52 40%, #6a6430 70%, #c2b46a); }
 html[data-theme="forest"] .bookcase::after { background: radial-gradient(60% 38% at 46% 0%, rgba(200, 255, 150, .07), transparent 70%), radial-gradient(130% 95% at 50% 35%, transparent 58%, rgba(0, 0, 0, .45)); }
 
 /* ═════════════ 2. CELESTIAL OBSERVATORY ═════════════ */
@@ -166,8 +165,6 @@ html[data-theme="cabin"] .b-back { background:
     radial-gradient(60% 55% at 38% 40%, rgba(255, 190, 110, .14), transparent 70%),
     var(--panel-tex) 0 0 / 256px auto; }
 html[data-theme="cabin"] .b-floor { background: linear-gradient(0deg, rgba(255, 222, 180, .05), rgba(30, 10, 0, .35) 35%, rgba(20, 8, 0, .8)), var(--wood-h) var(--wx, 0) -30px / 1024px auto; }
-html[data-theme="cabin"] .label-holder { background: linear-gradient(180deg, #5a5a5e, #2a2a2e 50%, #4a4a50); }
-html[data-theme="cabin"] .label-holder span { font-family: "Fraunces", Georgia, serif; font-style: italic; text-transform: none; letter-spacing: .04em; font-size: .78rem; font-weight: 600; }
 html[data-theme="cabin"] .bookcase::after { background: radial-gradient(60% 38% at 46% 0%, rgba(255, 190, 110, .1), transparent 70%), radial-gradient(130% 95% at 50% 35%, transparent 58%, rgba(10, 4, 0, .45)); }
 html[data-theme="cabin"] .shelf-note { border-radius: 2px; font-family: "Lora", Georgia, serif; }
 
@@ -212,9 +209,6 @@ html[data-theme="gothic"] .b-back { background-color: #4a0914; background-image:
     url("../assets/tex/cloth.jpg");
   background-size: auto, auto, 90px 100%, 40px; background-blend-mode: normal, normal, normal, overlay; }
 html[data-theme="gothic"] .case-crown .dentils { height: 18px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='18'%3E%3Cpath d='M2 18 V10 Q2 3 12 1 Q22 3 22 10 V18' fill='none' stroke='%23b8b4bc' stroke-opacity='.45' stroke-width='1.2'/%3E%3Cpath d='M6 18 V11 Q6 6 12 4 Q18 6 18 11 V18 Z' fill='%23000' fill-opacity='.65'/%3E%3C/svg%3E") 0 0 / 24px 18px repeat-x, linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(0, 0, 0, .4)), var(--wood-h) -40px -90px / 1024px auto; }
-html[data-theme="gothic"] .label-holder { background: linear-gradient(180deg, #f4f2f6, #a8a6b0 40%, #62606a 70%, #c8c6ce); }
-html[data-theme="gothic"] .label-holder::before, html[data-theme="gothic"] .label-holder::after { background: radial-gradient(circle at 35% 30%, #fff, #8a8890 55%, #3a3840); }
-html[data-theme="gothic"] .label-holder span { background: linear-gradient(180deg, #f0e6e6, #d8c8c8); color: #3a0a12; }
 html[data-theme="gothic"] .deco.bookend path:first-child { fill: url(#g-silver); }
 html[data-theme="gothic"] .vol { --gilt: linear-gradient(90deg, #6a6670, #f6f4f8 32%, #b8b4bc 52%, #eceaf0 68%, #5a5660); }
 html[data-theme="gothic"] .vol.b-leather .em, html[data-theme="gothic"] .vol.b-cloth .em, html[data-theme="gothic"] .vol.b-leather .a, html[data-theme="gothic"] .vol.b-cloth .a { color: #d8d4dc; }
@@ -305,9 +299,6 @@ html[data-theme="modern"] .b-floor { background: linear-gradient(0deg, rgba(255,
 html[data-theme="modern"] .b-wl { background: linear-gradient(90deg, rgba(70, 50, 25, .1), rgba(70, 50, 25, .35)), var(--wood-v) 0 0 / 256px auto; }
 html[data-theme="modern"] .b-wr { background: linear-gradient(270deg, rgba(70, 50, 25, .06), rgba(70, 50, 25, .3)), var(--wood-v) -100px 0 / 256px auto; }
 html[data-theme="modern"] .shelf-board { background: linear-gradient(180deg, rgba(255, 255, 255, .55) 0, rgba(255, 255, 255, .15) 2px, rgba(0, 0, 0, 0) 5px, rgba(0, 0, 0, 0) 55%, rgba(60, 40, 20, .18) 100%), var(--wood-h) var(--wx, 0) var(--wy, 0) / 1024px auto; box-shadow: 0 8px 10px -4px rgba(60, 40, 20, .3); }
-html[data-theme="modern"] .label-holder { background: #1f1f1f; box-shadow: 0 3px 6px rgba(0, 0, 0, .2); border-radius: 3px; }
-html[data-theme="modern"] .label-holder::before, html[data-theme="modern"] .label-holder::after { display: none; }
-html[data-theme="modern"] .label-holder span { background: #fff; text-transform: none; letter-spacing: .04em; font-size: .78rem; font-weight: 600; box-shadow: none; border-radius: 2px; }
 html[data-theme="modern"] .deco.bookend path:first-child { fill: #262626; }
 html[data-theme="modern"] .deco.obj > svg { filter: drop-shadow(8px 6px 6px rgba(60, 40, 20, .22)); }
 html[data-theme="modern"] .deco.obj::after { background: radial-gradient(closest-side, rgba(60, 40, 20, .3), transparent); }
@@ -387,8 +378,6 @@ html[data-theme="moonwood"] .b-back { background:
     radial-gradient(55% 50% at 70% 25%, rgba(200, 220, 255, .16), transparent 70%),
     var(--stars) 0 0 / 220px,
     var(--panel-tex) 0 0 / 256px auto; }
-html[data-theme="moonwood"] .label-holder { background: linear-gradient(180deg, #f8fafa, #b4bec0 40%, #6e7a7c 70%, #d0d8da); }
-html[data-theme="moonwood"] .label-holder::before, html[data-theme="moonwood"] .label-holder::after { background: radial-gradient(circle at 35% 30%, #fff, #8a9496 55%, #3a4446); }
 html[data-theme="moonwood"] .deco.bookend path:first-child { fill: url(#g-silver); }
 html[data-theme="moonwood"] .vol { --gilt: linear-gradient(90deg, #6a7472, #f8fbfa 32%, #b8c4c0 52%, #eef4f2 68%, #5a6462); }
 html[data-theme="moonwood"] .vol.b-leather .em, html[data-theme="moonwood"] .vol.b-cloth .em, html[data-theme="moonwood"] .vol.b-leather .a, html[data-theme="moonwood"] .vol.b-cloth .a { color: #dfe8e4; }
@@ -472,8 +461,6 @@ html[data-theme="elderglow"] .b-back { background:
     var(--panel-tex) 0 0 / 256px auto; }
 html[data-theme="elderglow"] .case-crown .dentils { background: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0) 0 9px, rgba(0, 0, 0, .7) 9px 12px), linear-gradient(180deg, rgba(150, 226, 204, .14), rgba(0, 0, 0, .45)), var(--wood-h) -40px -90px / 1024px auto; }
 html[data-theme="elderglow"] .case-crown .fascia::after { background: rgba(150, 226, 204, .4); }
-html[data-theme="elderglow"] .label-holder { background: linear-gradient(180deg, #e8fff8, #8ac4b4 40%, #3e6e64 70%, #b4e8d8); }
-html[data-theme="elderglow"] .label-holder span { background: linear-gradient(180deg, #eef8f4, #cfe4dc); color: #0e2a26; }
 html[data-theme="elderglow"] .deco.bookend path:first-child { fill: url(#g-silver); }
 html[data-theme="elderglow"] .vol { --gilt: linear-gradient(90deg, #4a7a70, #eafff8 32%, #96e2cc 52%, #dcfff4 68%, #3a6a60); }
 html[data-theme="elderglow"] .vol.b-leather .em, html[data-theme="elderglow"] .vol.b-cloth .em, html[data-theme="elderglow"] .vol.b-leather .a, html[data-theme="elderglow"] .vol.b-cloth .a { color: #b8f0e0; }
@@ -563,3 +550,11 @@ html[data-theme="duskleaf"] .b-back { background:
     var(--panel-tex) 0 0 / 256px auto; }
 html[data-theme="duskleaf"] .case-crown .dentils { background: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0) 0 9px, rgba(0, 0, 0, .7) 9px 12px), linear-gradient(180deg, rgba(255, 200, 140, .14), rgba(0, 0, 0, .45)), var(--wood-h) -40px -90px / 1024px auto; }
 html[data-theme="duskleaf"] .bookcase::after { background: radial-gradient(60% 38% at 46% 0%, rgba(255, 180, 110, .1), transparent 70%), radial-gradient(130% 95% at 50% 35%, transparent 58%, rgba(0, 0, 0, .45)); }
+
+/* inlay colour of the carved section names */
+html[data-theme="moonwood"] { --inlay: 222, 232, 230; }
+html[data-theme="elderglow"] { --inlay: 170, 236, 214; }
+html[data-theme="gothic"] { --inlay: 214, 210, 220; }
+html[data-theme="modern"] .shelf-mark { text-shadow: 0 1px 0 rgba(255, 255, 255, .35), 0 -1px 0 rgba(0, 0, 0, .25); }
+html[data-theme="modern"] .shelf-mark span { letter-spacing: .2em; }
+html[data-theme="moonwood"] .shelf-mark .star { width: 8px; height: 8px; clip-path: none; border-radius: 50%; -webkit-mask: radial-gradient(circle at 72% 34%, transparent 52%, #000 54%); mask: radial-gradient(circle at 72% 34%, transparent 52%, #000 54%); }

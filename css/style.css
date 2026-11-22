@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════
-   The Lantern Hall · dark academia
+   Moonwood
    ink black · oxblood · bottle green · aged brass · old paper
    ═══════════════════════════════════════════════════════════ */
 :root {
@@ -349,17 +349,22 @@ select.field option { background: var(--page-solid); }
     var(--wood-h) var(--wx, 0) var(--wy, 0) / 1024px auto;
   box-shadow: 0 10px 12px -3px rgba(0, 0, 0, .8);
 }
-/* brass card holder hanging from the board above a section */
-.label-holder {
-  position: absolute; z-index: 6; top: -13px; left: 50%; transform: translateX(-50%);
-  padding: 3px 13px;
-  background: linear-gradient(180deg, #f3dea6, #c19a55 35%, #8a6a32 70%, #cfae6d);
-  box-shadow: inset 0 0 0 1px rgba(60, 38, 14, .75), inset 0 1px 0 rgba(255, 244, 210, .6), 0 4px 7px rgba(0, 0, 0, .7);
+/* the section name, carved into the wood above it and inlaid in the room's metal */
+.shelf-mark {
+  position: absolute; z-index: 6; top: -26px; left: 50%; transform: translateX(-50%);
+  height: 26px; display: flex; align-items: center; gap: 10px; white-space: nowrap; pointer-events: none;
+  color: rgb(var(--inlay, var(--acc)));
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, .75), 0 1px 0 rgba(255, 240, 220, .12), 0 0 9px rgba(var(--inlay, var(--acc)), .28);
 }
-.label-holder::before, .label-holder::after { content: ""; position: absolute; top: 50%; width: 5px; height: 5px; margin-top: -2.5px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff1c4, #a07b3c 55%, #4a3418); box-shadow: 0 0 0 1px rgba(40, 26, 10, .5); }
-.label-holder::before { left: 4px; } .label-holder::after { right: 4px; }
-.label-holder span { display: block; padding: 3px 16px 3px; white-space: nowrap; background: linear-gradient(180deg, #efe5cb, #d6c7a1); color: #2a1a0e; font-family: var(--f-caps); font-weight: 700; font-size: .6rem; letter-spacing: .28em; text-transform: uppercase; box-shadow: inset 0 1px 3px rgba(0, 0, 0, .5); }
-.label-holder em { font-family: var(--f-body); font-style: italic; font-weight: 600; font-size: .86rem; letter-spacing: 0; text-transform: none; margin-left: 8px; opacity: .7; }
+.shelf-mark span { font-family: var(--f-caps); font-weight: 600; font-size: .72rem; letter-spacing: .34em; text-transform: uppercase; margin-right: -.34em; }
+.shelf-mark em { font-family: var(--f-body); font-style: italic; font-weight: 500; font-size: .98rem; opacity: .8; }
+.shelf-mark .star { width: 7px; height: 7px; background: currentColor; opacity: .75; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); filter: drop-shadow(0 -1px 0 rgba(0, 0, 0, .7)); }
+.shelf-mark .sprig {
+  width: 38px; height: 12px; background: currentColor; opacity: .7;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 14'%3E%3Cpath d='M44 7.2C34 7.4 22 8.2 7 6.2' fill='none' stroke='%23000' stroke-width='1.05'/%3E%3Cpath d='M35 7.3q-2-5.6-8.2-5.2q2.4 5 8.2 5.2zM29.5 7.7q-3 5.2-8.8 4.8q3-4.8 8.8-4.8zM22.5 7.9q-2-4.8-6.8-4.4q2 4.5 6.8 4.4zM17 7.6q-2.6 4.2-6.8 3.8q2.4-3.9 6.8-3.8zM9.5 6.5q-3.2-2.8-7.5-1q3.6 2.8 7.5 1z'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 14'%3E%3Cpath d='M44 7.2C34 7.4 22 8.2 7 6.2' fill='none' stroke='%23000' stroke-width='1.05'/%3E%3Cpath d='M35 7.3q-2-5.6-8.2-5.2q2.4 5 8.2 5.2zM29.5 7.7q-3 5.2-8.8 4.8q3-4.8 8.8-4.8zM22.5 7.9q-2-4.8-6.8-4.4q2 4.5 6.8 4.4zM17 7.6q-2.6 4.2-6.8 3.8q2.4-3.9 6.8-3.8zM9.5 6.5q-3.2-2.8-7.5-1q3.6 2.8 7.5 1z'/%3E%3C/svg%3E") center / contain no-repeat;
+  filter: drop-shadow(0 -1px 0 rgba(0, 0, 0, .7));
+}
+.shelf-mark .sprig.r { transform: scaleX(-1); }
 
 /* a paper note propped on an empty shelf */
 .bay.note-bay { justify-content: center; }

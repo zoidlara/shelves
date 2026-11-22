@@ -1,6 +1,6 @@
-# ✦ The Lantern Hall ✦
+# ✦ Moonwood ✦
 
-A cosy, candlelit hall of 3D bookshelves. Every reader gets their own bookcase with their name on a brass plate: books you've read and want to read, films, TV shows and songs.
+A moonlit forest hall of 3D bookshelves. Every reader gets their own bookcase with their name on a brass plate: books you've read and want to read, films, TV shows and songs.
 
 - **Type a title** and the Hall finds the author, year, genres, description and cover (Google Books, Open Library, iTunes, TVmaze, Wikipedia; all free, no keys).
 - **No cover online?** It binds a handmade hardcover with gold foil, corner studs and a little emblem that fits the story (a dragon, a wand, a crown…).
@@ -46,7 +46,8 @@ This gives everyone accounts and puts all bookcases in one shared room.
 ### Optional
 
 - **Sharper film posters**: get a free key at [themoviedb.org](https://www.themoviedb.org/settings/api) and paste it as `TMDB_API_KEY` in `js/config.js`.
-- **Rename the room**: change `HALL_NAME` in `js/config.js`.
+- **Rename the room**: set `HALL_NAME` in `js/config.js` (leave it empty to use the look's own name).
+- **Change the look**: the brush button switches between rooms; `DEFAULT_THEME` in `js/config.js` sets the one new visitors see (Moonwood).
 
 ---
 

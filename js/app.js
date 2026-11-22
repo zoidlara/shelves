@@ -45,7 +45,7 @@ function colorOf(it) {
 }
 
 // The name on the door: set it in config.js, or leave it empty to use the room's own name.
-const hallName = () => HALL_NAME || theme().hallName || "The Lantern Hall";
+const hallName = () => HALL_NAME || theme().hallName || "Moonwood";
 function setBrand() { $("#brandName").textContent = hallName(); document.title = `${hallName()} · Shelves`; }
 
 /* ═══════════════ boot ═══════════════ */
@@ -356,7 +356,9 @@ const bayCount = w => (w >= 960 ? 3 : w >= 600 ? 2 : 1);
 // A few ivy strands hanging from a board, at spots that look random but stay put.
 function vinesFor(seed, max = 2) {
   const n = 1 + (hash("vn" + seed) % max);
-  return Array.from({ length: n }, (_, k) => `<span class="vine" style="left:${4 + (hash("vx" + seed + k) % 90)}%">${vineSVG(seed + k)}</span>`).join("");
+  // Vines hang from either side and leave the middle free for the carved section name.
+  const at = k => { const v = hash("vx" + seed + k) % 60; return v < 30 ? 4 + v : 36 + v; };
+  return Array.from({ length: n }, (_, k) => `<span class="vine" style="left:${at(k)}%">${vineSVG(seed + k)}</span>`).join("");
 }
 
 function packBays(list, room) {
@@ -403,7 +405,8 @@ function renderShelves(animate = false) {
   const section = (status, labelText) => {
     const list = items.filter(i => i.status === status);
     const seed = hash(owner.id + kind + status) % 997;
-    const label = `<div class="label-holder"><span>${labelText}<em>${list.length}</em></span></div>`;
+    // The section name is carved into the wood above it, with a small inlaid sprig either side.
+    const label = `<div class="shelf-mark"><i class="sprig"></i><span>${labelText}</span><b class="star"></b><em>${list.length}</em><i class="sprig r"></i></div>`;
     if (!list.length) {
       const msg = status === "done"
         ? (mine ? `Your first ${K.one} is waiting to be shelved.<br><button class="btn gold small" data-add="${status}">${ICON.quill} ${K.add}</button>` : `Nothing here yet.`)

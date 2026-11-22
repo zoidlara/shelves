@@ -26,4 +26,4 @@ export const HALL_NAME = "";
 
 // The room look friends see first: academia, forest, celestial, cabin, gothic or modern.
 // Everyone can still switch it for themselves with the brush button.
-export const DEFAULT_THEME = "academia";
+export const DEFAULT_THEME = "moonwood";
