@@ -9,8 +9,8 @@
 //  your link can make their own named bookcase in the same room.
 // ─────────────────────────────────────────────────────────────
 
-export const SUPABASE_URL = "";      // e.g. "https://abcdefgh.supabase.co"
-export const SUPABASE_ANON_KEY = ""; // the long "anon public" key
+export const SUPABASE_URL = "https://wfsuwnynggumhrxwdarb.supabase.co";      // e.g. "https://abcdefgh.supabase.co"
+export const SUPABASE_ANON_KEY = "sb_publishable_Ab8kftHDHEPP5ygEhLEg_A_PYSw7KlM"; // the long "anon public" key
 
 // Optional, free: a TMDB API key gives sharper film posters.
 // Films and shows already work without it.
