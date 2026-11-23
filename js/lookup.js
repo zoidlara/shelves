@@ -77,21 +77,44 @@ async function olDescription(key) {
   } catch { return ""; }
 }
 
+async function appleBooks(q) {
+  const d = await jsonp(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=ebook&entity=ebook&limit=10`);
+  return (d.results || []).map(b => ({
+    kind: "book", title: b.trackName, creator: (b.artistName || "").replace(/\s*&\s*/g, ", "), year: (b.releaseDate || "").slice(0, 4),
+    description: strip(b.description || ""), cover: (b.artworkUrl100 || "").replace(/\/\d+x\d+bb\./, "/600x900bb."),
+    genres: tidyGenres((b.genres || []).filter(g => !/^books$/i.test(g))), extra: { pages: null, isbn: null }, from: "Apple Books",
+  }));
+}
+
 export async function searchBooks(q) {
-  const [g, o] = await Promise.allSettled([googleBooks(q), openLibrary(q)]);
-  const gb = g.status === "fulfilled" ? g.value : [];
-  const ol = o.status === "fulfilled" ? o.value : [];
+  // Three free sources at once; whichever answers fills in the others' gaps.
+  const [a, g, o] = await Promise.allSettled([appleBooks(q), googleBooks(q), openLibrary(q)]);
+  const ok = r => (r.status === "fulfilled" ? r.value : []);
+  const ab = ok(a), gb = ok(g), ol = ok(o);
+  const same = (x, b) => norm(x.title) === norm(b.title) || norm(b.title).startsWith(norm(x.title)) || norm(x.title).startsWith(norm(b.title));
   const out = [];
-  // Merge: Google has better descriptions, Open Library has bigger covers.
-  for (const b of gb) {
-    const twin = ol.find(x => norm(x.title) === norm(b.title) || norm(b.title).startsWith(norm(x.title)));
-    if (twin) {
-      if (twin.cover) b.cover = twin.cover;
-      if (!b.genres.length) b.genres = twin.genres;
-      if (!b.year || (twin.year && twin.year < b.year)) b.year = twin.year || b.year;
-      twin._used = true;
+  for (const b of [...ab, ...gb]) {
+    const twin = out.find(x => same(x, b) && norm(x.creator).split(" ")[0] === norm(b.creator).split(" ")[0]);
+    if (twin) { // already have it from another source: only fill what is missing
+      if (!twin.description) twin.description = b.description;
+      if (!twin.cover) twin.cover = b.cover;
+      if (!twin.genres.length) twin.genres = b.genres;
+      if (!twin.extra.pages) twin.extra.pages = b.extra.pages;
+      if (!twin.extra.isbn) twin.extra.isbn = b.extra.isbn;
+      continue;
     }
     out.push(b);
+  }
+  // Open Library: earliest year, bigger cover when we have none, subjects as genres.
+  for (const b of out) {
+    const twin = ol.find(x => same(x, b));
+    if (!twin) continue;
+    if (twin.cover && !b.cover) b.cover = twin.cover;
+    if (!b.genres.length) b.genres = twin.genres;
+    if (twin.year && (!b.year || twin.year < b.year)) b.year = twin.year;
+    if (!b.extra.pages) b.extra.pages = twin.extra.pages;
+    if (!b.description) b.extra.olKey = twin.extra.olKey;
+    twin._used = true;
   }
   for (const b of ol) if (!b._used) out.push(b);
   // de-duplicate same title+author
