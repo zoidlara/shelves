@@ -29,13 +29,17 @@ export function hasLocalItems() {
 export function localExport() { return load(); }
 
 /* ───────────── shared helpers ───────────── */
-function attachRatings(items, ratings, profiles) {
+function attachRatings(items, ratings, profiles, comments = []) {
   const names = Object.fromEntries((profiles || []).map(p => [p.id, p.display_name || p.username]));
   return items.map(it => ({
     ...it,
     ratings: ratings.filter(r => r.item_id === it.id).map(r => ({ ...r, name: names[r.user_id] || r.name || "A friend" })),
+    comments: comments.filter(c => c.item_id === it.id).map(c => ({ ...c, name: names[c.user_id] || "A friend" })),
   }));
 }
+
+// False until the comments table exists in the database (see supabase/schema.sql).
+export let commentsReady = mode === "local";
 
 /* ───────────── API ───────────── */
 export async function init() {
@@ -96,15 +100,17 @@ export async function listProfiles() {
 export async function listAll() {
   if (mode === "local") {
     const s = localState();
-    return attachRatings(s.items, s.ratings, [s.profile]);
+    return attachRatings(s.items, s.ratings, [s.profile], s.comments || []);
   }
-  const [{ data: items, error: e1 }, { data: ratings, error: e2 }, profiles] = await Promise.all([
+  const [{ data: items, error: e1 }, { data: ratings, error: e2 }, profiles, cm] = await Promise.all([
     sb.from("items").select("*").order("created_at"),
     sb.from("ratings").select("*"),
     listProfiles(),
+    sb.from("comments").select("*").order("created_at"),
   ]);
   if (e1 || e2) throw e1 || e2;
-  return attachRatings(items, ratings, profiles);
+  commentsReady = !cm.error; // a missing comments table must not break the shelves
+  return attachRatings(items, ratings, profiles, cm.error ? [] : cm.data);
 }
 
 export async function addItem(item) {
@@ -161,6 +167,24 @@ export async function setRating(item_id, stars, note = "") {
     return;
   }
   const { error } = await sb.from("ratings").upsert({ item_id, user_id: me.id, stars, note }, { onConflict: "item_id,user_id" });
+  if (error) throw error;
+}
+
+export async function addComment(item_id, body) {
+  const me = await currentProfile();
+  if (mode === "local") {
+    const s = localState(); s.comments = s.comments || [];
+    const c = { id: uid(), item_id, user_id: me.id, body, created_at: new Date().toISOString() };
+    s.comments.push(c); save(s); return c;
+  }
+  const { data, error } = await sb.from("comments").insert({ item_id, user_id: me.id, body }).select().single();
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteComment(id) {
+  if (mode === "local") { const s = localState(); s.comments = (s.comments || []).filter(c => c.id !== id); save(s); return; }
+  const { error } = await sb.from("comments").delete().eq("id", id);
   if (error) throw error;
 }
 

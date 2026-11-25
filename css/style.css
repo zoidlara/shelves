@@ -720,3 +720,42 @@ select.field option { background: var(--page-solid); }
 /* dustier page tops on the old decorative sets */
 .vol.decor .top-face { background: linear-gradient(180deg, rgba(0, 0, 0, .7), rgba(0, 0, 0, .25) 55%, rgba(0, 0, 0, .1)), repeating-linear-gradient(90deg, #b8a780 0 1px, #978763 1px 2px) !important; }
 .vol.decor.b-leather .top-face { background: linear-gradient(180deg, rgba(0, 0, 0, .7), rgba(0, 0, 0, .25) 55%, rgba(0, 0, 0, .1)), repeating-linear-gradient(90deg, #b8964f 0 1px, #8a6c32 1px 2px) !important; }
+
+/* ───── genre divider cards standing between groups on a shelf ───── */
+.g-mark {
+  flex: none; position: relative; z-index: 2; align-self: flex-end;
+  width: 24px; height: 166px; margin: 0 6px 0 8px;
+  display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 10px 0 9px;
+  color: #2a1a0e; cursor: default;
+  background: linear-gradient(90deg, rgba(60, 35, 10, .28), rgba(255, 252, 240, .35) 40%, rgba(60, 35, 10, .22)), #efe2bf;
+  border: 1px solid #8a6a36; border-top: 0;
+  box-shadow: 8px 6px 10px rgba(0, 0, 0, .65);
+  animation: arrive .7s var(--ease-spring) both; animation-delay: calc(var(--i, 0) * 22ms);
+}
+.bookcase.calm .g-mark { animation: none; }
+.g-mark::before { /* a brass tab that pokes up above the books */
+  content: ""; position: absolute; top: -16px; left: -1px; right: -1px; height: 17px; border-radius: 7px 7px 0 0;
+  background: linear-gradient(90deg, #6e5228, #e6c98a 38%, #b8945a 62%, #6e5228);
+  box-shadow: inset 0 1px 0 rgba(255, 240, 200, .6);
+}
+.g-mark::after { content: ""; position: absolute; top: -10px; left: 50%; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: #3a2810; opacity: .7; }
+.g-mark span {
+  writing-mode: vertical-rl; transform: rotate(180deg);
+  font-family: var(--f-caps); font-weight: 700; font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-height: 126px;
+}
+.g-mark em { font-family: var(--f-body); font-style: italic; font-weight: 600; font-size: 12px; line-height: 1; opacity: .8; }
+.quick-genres .chip { font-size: .8rem; }
+
+/* ───── comments under an item ───── */
+.comments { list-style: none; padding: 0; margin: 6px 0 0; max-height: 300px; overflow-y: auto; }
+.comments li { padding: 8px 0; border-bottom: 1px solid rgba(74, 20, 24, .18); }
+.comments .c-head { display: flex; align-items: baseline; gap: 10px; }
+.comments .who { font-family: var(--f-caps); font-weight: 700; font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; }
+.comments .when { font-style: italic; font-size: .85rem; color: #6b4e2a; }
+.comments .c-del { margin-left: auto; border: 0; background: none; color: #7d1f26; font-size: .9rem; padding: 0 4px; opacity: .6; }
+.comments .c-del:hover { opacity: 1; }
+.comments .c-body { margin: 2px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.comments .c-empty { font-style: italic; color: #6b4e2a; border: 0; }
+.c-form { display: flex; gap: 8px; align-items: flex-end; margin-top: 10px; }
+.c-form textarea { flex: 1; min-height: 56px; }

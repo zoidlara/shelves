@@ -86,3 +86,27 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- Comments: a conversation under any item, readable by the whole Hall.
+-- You can delete your own comments.
+create table if not exists public.comments (
+  id uuid primary key default gen_random_uuid(),
+  item_id uuid not null references public.items on delete cascade,
+  user_id uuid not null references public.profiles on delete cascade,
+  body text not null check (char_length(body) between 1 and 2000),
+  created_at timestamptz not null default now()
+);
+create index if not exists comments_item_idx on public.comments(item_id);
+alter table public.comments enable row level security;
+drop policy if exists "hall can see comments" on public.comments;
+drop policy if exists "add own comments"      on public.comments;
+drop policy if exists "remove comments"       on public.comments;
+create policy "hall can see comments" on public.comments for select using (true);
+create policy "add own comments"      on public.comments for insert with check (auth.uid() = user_id);
+create policy "remove comments"       on public.comments for delete using (auth.uid() = user_id);
+
+-- Newer Supabase projects don't open tables to the website automatically.
+-- The policies above still decide who may change what.
+grant usage on schema public to anon, authenticated;
+grant select on all tables in schema public to anon;
+grant select, insert, update, delete on all tables in schema public to authenticated;

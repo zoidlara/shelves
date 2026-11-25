@@ -30,6 +30,12 @@ function toast(msg, ms = 2600) {
 const nameOf = p => (p ? p.display_name || (p.username === "me" ? "" : p.username) : "Someone");
 const possessive = n => (!n ? "Your" : /s$/i.test(n) ? `${n}’` : `${n}’s`);
 const profileById = id => state.profiles.find(p => p.id === id);
+function ago(ts) {
+  const s = Math.max(0, (Date.now() - new Date(ts)) / 1000);
+  if (s < 60) return "just now";
+  const units = [["year", 31536000], ["month", 2592000], ["week", 604800], ["day", 86400], ["hour", 3600], ["minute", 60]];
+  for (const [u, n] of units) if (s >= n) { const v = Math.floor(s / n); return `${v} ${u}${v > 1 ? "s" : ""} ago`; }
+}
 const myStars = it => (state.me && (it.ratings || []).find(r => r.user_id === state.me.id)) || null;
 const ownerStars = it => (it.ratings || []).find(r => r.user_id === it.owner) || null;
 const avgStars = it => { const r = it.ratings || []; return r.length ? r.reduce((a, b) => a + b.stars, 0) / r.length : 0; };
@@ -249,7 +255,7 @@ function renderLibrary() {
       <label class="search-wrap">${ICON.search}<span class="sr-only">Find on this shelf</span>
         <input id="themeSearch" class="field" type="search" placeholder="Pull from the shelf: dragons, magic school, funny…" value="${esc(state.filter.q)}" autocomplete="off"></label>
       <select id="sortSel" class="field" aria-label="Arrange by">
-        ${[["shelf", "As placed"], ["title", "By title"], ["creator", kind === "book" ? "By author" : "By creator"], ["rating", "By rating"], ["year", "By year"], ["colour", "By colour (rainbow!)"]].map(([v, l]) => `<option value="${v}" ${state.filter.sort === v ? "selected" : ""}>${l}</option>`).join("")}
+        ${[["shelf", "By genre"], ["placed", "As placed"], ["title", "By title"], ["creator", kind === "book" ? "By author" : "By creator"], ["rating", "By rating"], ["year", "By year"], ["colour", "By colour (rainbow!)"]].map(([v, l]) => `<option value="${v}" ${state.filter.sort === v ? "selected" : ""}>${l}</option>`).join("")}
       </select>
       ${mine ? `<button class="btn gold" id="addBtn">${ICON.quill} ${K.add}</button>` : ""}
       <button class="btn moss" id="suggestBtn">${ICON.wand} Find me something</button>
@@ -286,7 +292,61 @@ function sortItems(list) {
   return L;
 }
 
+/* Broad genre shelves: every item is filed under one big genre, like a library section. */
+const GENRE_RULES = {
+  // Checked in order; the first rule any of an item's genres matches decides its section.
+  // (Lookups often turn "Science Fiction" into "Science" and "Fiction & Literature" into "Literature".)
+  book: [
+    ["Comics", /comic|graphic novel|manga/], ["Poetry", /poet/],
+    ["Fantasy", /fantas|magic|dragon|fairy|myth|witch|wizard|fae\b/],
+    ["Sci-Fi", /science fiction|sci-?fi|^science-?$|dystop|space opera|cyberpunk/],
+    ["Horror", /horror|ghost|vampire|zombie/], ["Mystery", /myster|thriller|crime|detective|suspense|murder/],
+    ["Romance", /romanc|lovers|slow burn/],
+    ["Young Adult", /young adult|\bya\b|teen|kid|child|chapter book|fable/],
+    ["Historical", /histor/], ["Classics", /classic/],
+    ["Non-fiction", /non-?fiction|biograph|memoir|self-help|business|psycholog|philosoph|true crime|essay|cook|religio|spiritual|health|education|professional|technical|criticism/],
+    ["Literary", /literat|literary|contemporary|fiction|novel|drama|theat|short stor|humou?r/],
+    ["Adventure", /action|adventure/],
+  ],
+  film: [
+    ["Animation", /anima|anime|cartoon/], ["Documentary", /documentar/], ["Horror", /horror/], ["Sci-Fi", /sci|fantas|supernatural/],
+    ["Comedy", /comed|humou?r/], ["Romance", /romanc|love/], ["Crime", /crime|thriller|myster|suspense|detective/],
+    ["Action", /action|adventure|war|western/], ["Musical", /music/], ["Family", /family|kids|child/], ["Drama", /drama|medical|history|sport/],
+  ],
+  song: [
+    ["Hip-Hop", /rap|hip/], ["R&B", /^r$|^b$|r&b|soul|funk/], ["Pop", /pop/], ["Rock", /rock|metal|punk|grunge/],
+    ["Indie", /indie|alternative|folk/], ["Electronic", /electr|dance|house|techno/], ["Jazz", /jazz|blues/],
+    ["Classical", /classical|opera/], ["Soundtrack", /soundtrack|score/], ["Country", /country/],
+  ],
+};
+GENRE_RULES.show = GENRE_RULES.film;
+const FIC_SOURCES = ["ao3", "wattpad", "tumblr", "other"];
+function broadGenre(it) {
+  if (it.kind === "book" && FIC_SOURCES.includes(it.source)) return "Fics";
+  const gs = (it.genres || []).map(g => g.toLowerCase());
+  if (!gs.length) return "Unsorted";
+  for (const [name, re] of GENRE_RULES[it.kind] || []) if (gs.some(g => re.test(g))) return name;
+  return "Other";
+}
+// Group a section's items by genre and put a labelled divider card in front of each group.
+function withGenreMarkers(list) {
+  const seriesBucket = {}; const groups = new Map();
+  for (const it of list) {
+    const s = seriesOf(it); const key = s ? s + "|" + it.creator : "";
+    let g = key && seriesBucket[key];
+    if (!g) { g = broadGenre(it); if (key) seriesBucket[key] = g; }
+    if (!groups.has(g)) groups.set(g, []);
+    groups.get(g).push(it);
+  }
+  const order = [...groups.entries()].sort((a, b) => (["Other", "Unsorted"].indexOf(a[0])) - (["Other", "Unsorted"].indexOf(b[0])) || b[1].length - a[1].length || a[0].localeCompare(b[0]));
+  return order.flatMap(([genre, its]) => [{ marker: true, id: "gm-" + genre, genre, count: its.length }, ...its]);
+}
+function markerHTML(m, i) {
+  return `<div class="g-mark" style="--i:${i}" title="${esc(m.genre)}: ${m.count}"><em>${m.count}</em><span>${esc(m.genre)}</span></div>`;
+}
+
 function dims(it) {
+  if (it.marker) return { w: 38, h: 166, d: 4 };
   const h = hash(it.id + it.title);
   if (it.kind === "film") return { w: 26, h: 188, d: 132 };
   if (it.kind === "show") return { w: 40 + (h % 12), h: 184, d: 130 };
@@ -322,6 +382,7 @@ function spineTitle(it) {
 }
 
 function volHTML(it, i, lean) {
+  if (it.marker) return markerHTML(it, i);
   const { w, h, d } = dims(it); const c = colorOf(it); const bind = bindingOf(it);
   const pale = hexHue(c.bg)[2] > 0.55 ? "pale" : "";
   const stitle = spineTitle(it);
@@ -332,7 +393,7 @@ function volHTML(it, i, lean) {
   const showAuthor = w >= 26 && author && it.kind === "book" && h - 64 - authorLen >= titleNeed;
   const avail = it.kind === "film" ? h - filmTop - 34 : h - 64 - (showAuthor ? authorLen : 0);
   const fs = Math.max(7, Math.min(Math.floor(w * 0.4), 12, Math.floor((avail - 16) / Math.max(4, stitle.length * 0.86))));
-  const others = (it.ratings || []).some(r => r.user_id !== it.owner);
+  const others = (it.ratings || []).some(r => r.user_id !== it.owner) || (it.comments || []).length > 0;
   const seasons = it.kind === "show" && it.year ? `<span class="seasons">${esc(it.year)}</span>` : "";
   const strip = it.kind === "film" && it.cover ? `<span class="poster-strip"><img src="${esc(it.cover)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></span>` : "";
   const head = it.kind === "film" ? strip : emblemSVG(emblemFor(it), "em");
@@ -344,7 +405,7 @@ function volHTML(it, i, lean) {
       <span class="face back-face"></span>
       <span class="face top-face"></span>
     </span>
-    ${others ? `<span class="friend-dot" title="Friends rated this"></span>` : ""}
+    ${others ? `<span class="friend-dot" title="Friends rated or commented on this"></span>` : ""}
   </button>`;
 }
 
@@ -363,11 +424,12 @@ function vinesFor(seed, max = 2) {
 
 function packBays(list, room) {
   const bays = []; let cur = [], used = 0;
-  for (const it of list) {
-    const w = dims(it).w + GAP;
-    if (cur.length && used + w > room) { bays.push({ items: cur, used }); cur = []; used = 0; }
+  list.forEach((it, k) => {
+    let w = dims(it).w + GAP;
+    const need = it.marker && list[k + 1] ? w + dims(list[k + 1]).w + GAP : w;
+    if (cur.length && used + need > room) { bays.push({ items: cur, used }); cur = []; used = 0; }
     cur.push(it); used += w;
-  }
+  });
   if (cur.length) bays.push({ items: cur, used });
   return bays;
 }
@@ -403,11 +465,12 @@ function renderShelves(animate = false) {
   };
 
   const section = (status, labelText) => {
-    const list = items.filter(i => i.status === status);
+    const raw = items.filter(i => i.status === status);
+    const list = state.filter.sort === "shelf" ? withGenreMarkers(raw) : raw;
     const seed = hash(owner.id + kind + status) % 997;
     // The section name is carved into the wood above it, with a small inlaid sprig either side.
-    const label = `<div class="shelf-mark"><i class="sprig"></i><span>${labelText}</span><b class="star"></b><em>${list.length}</em><i class="sprig r"></i></div>`;
-    if (!list.length) {
+    const label = `<div class="shelf-mark"><i class="sprig"></i><span>${labelText}</span><b class="star"></b><em>${raw.length}</em><i class="sprig r"></i></div>`;
+    if (!raw.length) {
       const msg = status === "done"
         ? (mine ? `Your first ${K.one} is waiting to be shelved.<br><button class="btn gold small" data-add="${status}">${ICON.quill} ${K.add}</button>` : `Nothing here yet.`)
         : (mine ? `Wishes go here: the ${K.one}s you’d love to get&nbsp;to.<br><button class="btn small" data-add="${status}">${ICON.plus} Add a wish</button>` : `No wishes yet.`);
@@ -429,7 +492,7 @@ function renderShelves(animate = false) {
         const b = slots[r * n + k]; const s = seed + r * 31 + k * 7;
         if (!b) { bays.push(bayHTML(k, decoRun(fillBay(s, room, true, used)), "decor-bay")); continue; }
         let left = room - b.used;
-        const lean = left > 46 && b.items.length > 2;
+        const lean = left > 46 && b.items.length > 2 && !b.items[b.items.length - 1].marker;
         if (lean) left -= 20;
         const vols = b.items.map((it, j) => volHTML(it, idx++, lean && j === b.items.length - 1)).join("");
         bays.push(bayHTML(k, vols + decoRun(left >= 60 ? fillBay(s, left - 6, false, used) : [])));
@@ -600,6 +663,12 @@ function openDetail(it) {
       ${others.length ? `<span class="label">What everyone thought ${avg ? `<span class="avg">· ${avg.toFixed(1)} ★ average</span>` : ""}</span>
         <ul class="ratings-list">${others.map(r => `<li><span class="who">${esc(r.user_id === it.owner ? nameOf(owner) : r.name)}</span><span class="stars readonly">${"★".repeat(r.stars)}${"☆".repeat(5 - r.stars)}</span>${r.note ? `<span class="note">“${esc(r.note)}”</span>` : ""}</li>`).join("")}</ul>` : ""}
       <div class="divider"></div>
+      <span class="label">Comments <span class="avg" id="cCount"></span></span>
+      <ul class="comments" id="cList"></ul>
+      ${!db.commentsReady ? `<p class="hint">Comments are almost ready: the Hall’s keeper still has to open them in the database.</p>`
+        : state.me ? `<div class="c-form"><textarea class="field" id="cBody" rows="2" maxlength="2000" placeholder="Say something about it. Everyone in the Hall can read this."></textarea><button class="btn gold small" id="cPost">${ICON.quill} Post</button></div>`
+        : db.mode === "cloud" ? `<p class="hint"><button class="more-link" data-act="join">Make your own bookcase</button> to join the conversation.</p>` : ""}
+      <div class="divider"></div>
       <div class="row">
         ${mine ? `<button class="btn small" id="moveBtn">${ICON.move} Move to ${esc(it.status === "done" ? K.want : K.done)}</button>
                   <button class="btn small" id="editBtn">${ICON.edit} Edit</button>` : ""}
@@ -617,6 +686,37 @@ function openDetail(it) {
   const book = $(".book3d", w); const stage = $(".book3d-stage", w);
   stage.addEventListener("pointermove", e => { const r = stage.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5; book.style.transform = `rotateY(${-18 + x * 30}deg) rotateX(${6 - y * 14}deg)`; });
   stage.addEventListener("pointerleave", () => (book.style.transform = ""));
+
+  // comments: everyone in the Hall sees them; you can remove your own
+  const paintComments = () => {
+    const cur = state.items.find(i => i.id === it.id) || it;
+    const list = cur.comments || [];
+    $("#cCount", w).textContent = list.length ? `· ${list.length}` : "";
+    $("#cList", w).innerHTML = list.length
+      ? list.map(c => {
+          const p = profileById(c.user_id);
+          const canDel = state.me && c.user_id === state.me.id;
+          return `<li><div class="c-head"><span class="who">${esc(p ? nameOf(p) || "You" : c.name)}</span><span class="when">${esc(ago(c.created_at))}</span>${canDel ? `<button class="c-del" data-id="${c.id}" aria-label="Delete this comment" title="Delete">×</button>` : ""}</div><p class="c-body">${esc(c.body)}</p></li>`;
+        }).join("")
+      : db.commentsReady ? `<li class="c-empty">No comments yet. Start the conversation.</li>` : "";
+    $$(".c-del", w).forEach(b => b.addEventListener("click", async () => {
+      if (!b.dataset.sure) { b.dataset.sure = "1"; b.textContent = "Delete?"; return; }
+      try { await db.deleteComment(b.dataset.id); await refresh(); paintComments(); } catch (e) { console.error(e); toast("Couldn’t delete that. Try again?"); }
+    }));
+  };
+  paintComments();
+  const post = $("#cPost", w);
+  if (post) {
+    const send = async () => {
+      const ta = $("#cBody", w); const body = ta.value.trim(); if (!body) return;
+      post.disabled = true;
+      try { await db.addComment(it.id, body); ta.value = ""; await refresh(); paintComments(); toast("Comment posted ✦"); if (state.route.page === "shelf") softRerender(); }
+      catch (e) { console.error(e); toast("The ink smudged: " + (e.message || "try again")); }
+      post.disabled = false;
+    };
+    post.addEventListener("click", send);
+    $("#cBody", w).addEventListener("keydown", e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(); } });
+  }
 
   const more = $("#moreDesc", w); if (more) more.addEventListener("click", () => { $("#dDesc", w).classList.remove("clamp"); more.remove(); });
 
@@ -733,6 +833,7 @@ async function openConfirm(item, opts = {}) {
         <label class="label">Genres & themes</label>
         <div class="row" id="gChips" style="gap:6px"></div>
         <input id="fGenre" class="field" style="margin-top:8px" placeholder="Add a genre or theme and press Enter (e.g. enemies to lovers)">
+        ${GENRE_RULES[item.kind] ? `<div class="row quick-genres" id="gQuick" style="gap:6px;margin-top:8px"></div>` : ""}
         <label class="label" for="fDesc">What it’s about</label><textarea id="fDesc" class="field" placeholder="A few lines about the story…">${esc(item.description)}</textarea>
         ${manual || editing ? `<label class="label" for="fCover">Cover image link (optional)</label><input id="fCover" class="field" value="${esc(item.cover || "")}" placeholder="Leave empty for a handmade cover">` : ""}
         ${!editing ? `<label class="label">Shelf</label><div class="seg" id="cStatus"><button type="button" data-s="done" aria-pressed="${item.status === "done"}">${K.done}</button><button type="button" data-s="want" aria-pressed="${item.status === "want"}">${K.want}</button></div>` : ""}
@@ -744,6 +845,13 @@ async function openConfirm(item, opts = {}) {
   const paintChips = () => {
     $("#gChips", w).innerHTML = genres.map((g, i) => `<button type="button" class="chip" aria-pressed="true" data-i="${i}">${esc(g)} <span class="x">×</span></button>`).join("") || `<span class="hint">None yet</span>`;
     $$("#gChips .chip", w).forEach(b => b.addEventListener("click", () => { genres.splice(+b.dataset.i, 1); paintChips(); }));
+    // one-tap genre shelves, so every new item lands under a genre label
+    const q = $("#gQuick", w); if (!q) return;
+    const shelf = genres.length ? broadGenre({ ...item, genres }) : null;
+    const opts = GENRE_RULES[item.kind].map(r => r[0]).filter(g => !genres.some(x => x.toLowerCase() === g.toLowerCase()));
+    q.innerHTML = `<span class="hint" style="width:100%">${shelf ? `It will stand in the <b>${esc(shelf)}</b> section. ` : "No genre yet: pick one so it gets a section. "}Quick picks:</span>` +
+      opts.map(g => `<button type="button" class="chip" data-g="${esc(g)}">+ ${esc(g)}</button>`).join("");
+    $$("button", q).forEach(b => b.addEventListener("click", () => { genres.unshift(b.dataset.g); paintChips(); }));
   };
   paintChips();
   $("#fGenre", w).addEventListener("keydown", e => {
